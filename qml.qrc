@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>icons/session-close.png</file>
+        <file>icons/back.png</file>
+        <file>icons/forward.png</file>
+        <file>icons/zoom-in.png</file>
+        <file>icons/zoom-out.png</file>
+        <file>KioskButton.qml</file>
+        <file>Spacer.qml</file>
+    </qresource>
+</RCC>
