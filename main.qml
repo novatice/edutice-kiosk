@@ -137,10 +137,6 @@ Window {
                 }
 
                 onFileDialogRequested: function (request) {
-
-
-                    /*notifier.showNotification(
-                                "Le téléversement de fichiers n'est pas autorisé")*/
                     showMessage("Oups",
                                 "Le téléversement de fichiers n'est pas autorisé")
                     request.accepted = true
@@ -176,11 +172,5 @@ Window {
                 url: urlToLoad
             }
         }
-    }
-
-    Notification {
-        id: notifier
-        width: 300
-        height: 80
     }
 }
