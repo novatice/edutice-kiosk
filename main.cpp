@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 
 
 
-    QFile configurationFile = QFile("/etc/edutice/kiosk.json");
+    QFile configurationFile = QFile("/etc/edutice-kiosk/kiosk.json");
 
     if(!configurationFile.exists()) {
         logger.critical() << "Unable to find configuration file";
@@ -51,6 +51,7 @@ int main(int argc, char *argv[])
             QJsonValue urlValue = configuration.value("url");
 
             if (urlValue.isUndefined()) {
+                logger.critical() << "Unable to find \"url\" key in configuration";
                 ::exit(3);
             }
 
@@ -73,6 +74,7 @@ int main(int argc, char *argv[])
             return app.exec();
 
         } else {
+            logger.critical() << "Unable to open configuration file";
             ::exit(2);
         }
     }
