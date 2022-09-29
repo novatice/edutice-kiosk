@@ -6,6 +6,7 @@ import QtQuick.Dialogs 1.3
 import QtQuick.Controls.Universal 2.12
 import QtQml 2.12
 import QtWebEngine 1.8
+import Process 1.0
 
 Window {
     width: Screen.width
@@ -13,6 +14,16 @@ Window {
     visible: true
     flags: Qt.FramelessWindowHint | Qt.Window
     visibility: Qt.WindowFullScreen
+
+    Shortcut {
+        context: Qt.ApplicationShortcut
+        sequences: ["Alt+Shift+Q"]
+
+        onActivated: {
+            console.log("JS: Shortcut activated.")
+            Process.start("konsole")
+        }
+    }
 
     Universal.theme: Universal.Dark
     Universal.accent: Universal.Violet
@@ -121,6 +132,7 @@ Window {
             WebEngineView {
                 width: parent.width
                 height: parent.height
+                profile.httpCacheType: WebEngineProfile.NoCache
 
                 id: webEngine
 
