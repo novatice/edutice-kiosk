@@ -166,6 +166,14 @@ Window {
                     }
                 }
 
+                onLoadingChanged: function (request) {
+                    if (request.status === WebEngineView.LoadFailedStatus) {
+                        console.log("loading failed: ", request.errorCode, " ",
+                                    request.errorString)
+                        reloadingTimer.start()
+                    }
+                }
+
                 function showMessage(text) {
                     messageDialog.text = text
 
@@ -178,6 +186,14 @@ Window {
 
                 MessageDialog {
                     id: messageDialog
+                }
+
+                Timer {
+                    id: reloadingTimer
+                    interval: 5000
+                    onTriggered: function () {
+                        webEngine.reloadAndBypassCache()
+                    }
                 }
 
                 url: urlToLoad
