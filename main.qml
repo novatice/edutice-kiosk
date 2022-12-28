@@ -149,13 +149,12 @@ Window {
                 }
 
                 onFileDialogRequested: function (request) {
-                    showMessage("Oups",
-                                "Le téléversement de fichiers n'est pas autorisé")
+                    showMessage("Le téléversement de fichiers n'est pas autorisé")
                     request.accepted = true
                 }
 
                 onNewViewRequested: function (request) {
-                    showMessage("L'ouverte de liens externes dans un nouvel onglet n'est pas autorisée")
+                    showMessage("L'ouverture de liens externes dans un nouvel onglet n'est pas autorisée")
                 }
 
                 onNavigationRequested: function (request) {
