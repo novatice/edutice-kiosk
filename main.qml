@@ -154,9 +154,7 @@ Window {
                 }
 
                 onNewViewRequested: function (request) {
-                    if (request.userInitiated) {
-                        webEngine.url = request.requestedUrl
-                    }
+                    showMessage("L'ouverture de liens externes dans un nouvel onglet n'est pas autorisée")
                 }
 
                 onNavigationRequested: function (request) {
