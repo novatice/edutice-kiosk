@@ -11,10 +11,10 @@
 
 static QObject *get_process_singleton(QQmlEngine *engine,
                                       QJSEngine *scriptEngine) {
-  Q_UNUSED(engine)
+  //Q_UNUSED(engine)
   Q_UNUSED(scriptEngine)
 
-  Process *process = new Process();
+  Process *process = new Process(engine);
   return process;
 }
 
@@ -46,9 +46,11 @@ int main(int argc, char *argv[]) {
       break;
     }
   }
-
+#ifdef __linux__
   QFile configurationFile = QFile("/etc/edutice-kiosk/kiosk.json");
-
+#elif _WIN32
+  QFile configurationFile = QFile ("C:\\ProgramData\\Novatice\\Edutice\\Service\\kiosk\\webportal.txt");
+#endif
   if (!configurationFile.exists()) {
     logger.critical() << "Unable to find configuration file";
     ::exit(1);

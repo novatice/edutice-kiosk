@@ -68,7 +68,7 @@ Window {
                     text: "Fermer la session"
                     icon.source: "icons/session-close.png"
                     padding: 10
-                    onClicked: Qt.quit()
+                    onClicked: Process.disconnect()
 
                     contentItem: RowLayout {
 
