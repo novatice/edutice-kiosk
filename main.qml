@@ -52,11 +52,13 @@ Window {
                     KioskButton {
                         icon.source: "icons/back.png"
                         onClicked: webEngine.goBack()
+                        disabled: !webEngine.canGoBack
                     }
 
                     KioskButton {
                         icon.source: "icons/forward.png"
                         onClicked: webEngine.goForward()
+                        disabled: !webEngine.canGoForward
                     }
                 }
 
