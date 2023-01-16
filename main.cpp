@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
 #ifdef __linux__
   QFile configurationFile = QFile("/etc/edutice-kiosk/kiosk.json");
 #elif _WIN32
-  QFile configurationFile = QFile ("C:\\ProgramData\\Novatice\\Edutice\\Service\\kiosk\\webportal.txt");
+  QFile configurationFile = QFile ("C:\\Program Files\\Novatice Technologies\\kiosk\\webportal.txt");
 #endif
   if (!configurationFile.exists()) {
     logger.critical() << "Unable to find configuration file";

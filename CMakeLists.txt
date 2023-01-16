@@ -35,3 +35,5 @@ target_compile_definitions(edutice-kiosk
 
 target_link_libraries(edutice-kiosk
   PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick Qt${QT_VERSION_MAJOR}::WebEngine Qt5::QuickControls2)
+
+set_target_properties(edutice-kiosk PROPERTIES WIN32_EXECUTABLE TRUE)
