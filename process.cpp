@@ -21,7 +21,7 @@ void Process::start(const QString &program) {
 
 void Process::disconnect (){
 #ifdef __linux__
-    m_engine->quit()
+    m_engine->quit();
 #elif _WIN32
     m_process->startDetached("shutdown -L");
     m_process->waitForFinished(-1);
