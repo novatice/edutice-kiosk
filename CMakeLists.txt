@@ -9,10 +9,10 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(QT webengine)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Quick WebEngine QuickControls2)
+find_package(QT NAMES Qt5 REQUIRED COMPONENTS Core Quick WebEngine QuickControls2)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick WebEngine QuickControls2)
 
 set(TS_FILES edutice-kiosk_fr_FR.ts)
