@@ -30,8 +30,10 @@ Window {
 
     Column {
         Item {
+            id: banner
+            visible: !totem
             width: parent.width
-            height: 80
+            height: totem ? 0 : 80
 
             Rectangle {
                 color: "#444B69"
@@ -129,7 +131,7 @@ Window {
 
         Item {
             width: parent.parent.width
-            height: parent.parent.height - 80
+            height: parent.parent.height - banner.height
 
             WebEngineView {
                 width: parent.width

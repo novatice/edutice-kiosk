@@ -62,13 +62,21 @@ int main(int argc, char *argv[]) {
           QJsonDocument::fromJson(content.toUtf8()).object();
 
       QJsonValue urlValue = configuration.value("url");
+      QJsonValue totemValue = configuration.value("totem");
 
       if (urlValue.isUndefined()) {
         logger.critical() << "Unable to find \"url\" key in configuration";
         ::exit(3);
       }
+      bool totem;
+      if(totemValue.isUndefined()){
+          totem = false;
+      }else{
+          totem = true;
+      }
 
       QString url = normalizeUrl(urlValue.toString());
+
       QQmlApplicationEngine engine;
 
       qmlRegisterSingletonType<Process>("Process", 1, 0, "Process",
@@ -83,6 +91,7 @@ int main(int argc, char *argv[]) {
           },
           Qt::QueuedConnection);
       engine.rootContext()->setContextProperty("urlToLoad", url);
+      engine.rootContext()->setContextProperty("totem",totem);
 
       logger.debug() << "just before start";
 
