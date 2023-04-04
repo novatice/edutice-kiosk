@@ -54,13 +54,29 @@ Window {
                     KioskButton {
                         icon.source: "icons/back.png"
                         onClicked: webEngine.goBack()
+                        tooltip: "Précédent"
                         disabled: !webEngine.canGoBack
                     }
 
                     KioskButton {
                         icon.source: "icons/forward.png"
                         onClicked: webEngine.goForward()
+                        tooltip: "Précédent"
                         disabled: !webEngine.canGoForward
+                    }
+
+                    KioskButton {
+                        icon.source: "icons/refresh.svg"
+                        onClicked: webEngine.reloadAndBypassCache()
+                        tooltip: "Recharger la page"
+                        disabled: webEngine.loading
+                    }
+
+                    KioskButton {
+                        icon.source: "icons/home.svg"
+                        onClicked: webEngine.goHome()
+                        tooltip: "Retourner à la page d'accueuil"
+                        disabled: false
                     }
                 }
 
@@ -72,6 +88,7 @@ Window {
                     text: "Fermer la session"
                     icon.source: "icons/session-close.png"
                     padding: 10
+                    tooltip: "Fermer la session"
                     onClicked: Process.disconnect()
 
                     contentItem: RowLayout {
@@ -98,47 +115,74 @@ Window {
                     Layout.alignment: Qt.AlignRight
                     KioskButton {
                         icon.source: "icons/zoom-out.png"
+                        tooltip: "Zoom arrière"
                         onClicked: {
-                            webEngine.zoomFactor = webEngine.zoomFactor - 0.1
-                            webEngine.zoomFactor = webEngine.zoomFactor - 0.1
+                            let newZoomFactor = webEngine.zoomFactor - 0.1
+                            webEngine.zoomFactor = newZoomFactor
+                            webEngine.zoomFactor = newZoomFactor
                         }
                     }
 
                     KioskButton {
                         id: zoom
                         text: (webEngine.zoomFactor * 100).toFixed(0) + "%"
+                        tooltip: "Réinitialiser le zoom"
+                        contentItem: Item {
+                            implicitHeight: text.implicitHeight + 10
+                            implicitWidth: text.implicitWidth + 20
 
-                        contentItem: Text {
-                            text: zoom.text
-                            color: "white"
+                            Rectangle {
+                                anchors.fill: parent
+                                anchors.centerIn: parent
+                                antialiasing: true
+                                color: "transparent"
+                                border.color: "white"
+                                radius: 5
+                            }
+
+                            Text {
+                                id: text
+                                anchors.centerIn: parent
+                                text: zoom.text
+                                color: "white"
+                            }
                         }
 
                         onClicked: {
+                            webEngine.zoomFactor = 1
                             webEngine.zoomFactor = 1
                         }
                     }
 
                     KioskButton {
                         icon.source: "icons/zoom-in.png"
+                        tooltip: "Zoom avant"
                         onClicked: {
-                            webEngine.zoomFactor = webEngine.zoomFactor + 0.1
-                            webEngine.zoomFactor = webEngine.zoomFactor + 0.1
+                            let newZoomFactor = webEngine.zoomFactor + 0.1
+                            webEngine.zoomFactor = newZoomFactor
+                            webEngine.zoomFactor = newZoomFactor
                         }
                     }
                 }
             }
         }
 
-        Item {
+        Column {
             width: parent.parent.width
             height: parent.parent.height - banner.height
 
             WebEngineView {
+                property string homeUrl: urlToLoad
+
                 width: parent.width
                 height: parent.height
                 profile.httpCacheType: WebEngineProfile.NoCache
 
                 id: webEngine
+
+                function goHome() {
+                    url = homeUrl
+                }
 
                 onContextMenuRequested: function (request) {
                     request.accepted = true

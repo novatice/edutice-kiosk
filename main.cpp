@@ -11,7 +11,7 @@
 
 static QObject *get_process_singleton(QQmlEngine *engine,
                                       QJSEngine *scriptEngine) {
-  //Q_UNUSED(engine)
+  // Q_UNUSED(engine)
   Q_UNUSED(scriptEngine)
 
   Process *process = new Process(engine);
@@ -49,7 +49,8 @@ int main(int argc, char *argv[]) {
 #ifdef __linux__
   QFile configurationFile = QFile("/etc/edutice-kiosk/kiosk.json");
 #elif _WIN32
-  QFile configurationFile = QFile ("C:\\Program Files\\Novatice Technologies\\kiosk\\webportal.txt");
+  QFile configurationFile =
+      QFile("C:\\Program Files\\Novatice Technologies\\kiosk\\webportal.txt");
 #endif
   if (!configurationFile.exists()) {
     logger.critical() << "Unable to find configuration file";
@@ -69,10 +70,10 @@ int main(int argc, char *argv[]) {
         ::exit(3);
       }
       bool totem;
-      if(totemValue.isUndefined()){
-          totem = false;
-      }else{
-          totem = true;
+      if (totemValue.isUndefined()) {
+        totem = false;
+      } else {
+        totem = true;
       }
 
       QString url = normalizeUrl(urlValue.toString());
@@ -91,7 +92,7 @@ int main(int argc, char *argv[]) {
           },
           Qt::QueuedConnection);
       engine.rootContext()->setContextProperty("urlToLoad", url);
-      engine.rootContext()->setContextProperty("totem",totem);
+      engine.rootContext()->setContextProperty("totem", totem);
 
       logger.debug() << "just before start";
 

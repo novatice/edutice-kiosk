@@ -8,5 +8,7 @@
         <file>icons/zoom-out.png</file>
         <file>KioskButton.qml</file>
         <file>Spacer.qml</file>
+        <file>icons/home.svg</file>
+        <file>icons/refresh.svg</file>
     </qresource>
 </RCC>
