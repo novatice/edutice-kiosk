@@ -1,14 +1,22 @@
 <RCC>
     <qresource prefix="/">
-        <file>main.qml</file>
+        <file>qml/main.qml</file>
         <file>icons/session-close.png</file>
         <file>icons/back.png</file>
         <file>icons/forward.png</file>
-        <file>icons/zoom-in.png</file>
-        <file>icons/zoom-out.png</file>
-        <file>KioskButton.qml</file>
-        <file>Spacer.qml</file>
+        <file>icons/zoom-out.svg</file>
+        <file>qml/KioskButton.qml</file>
+        <file>qml/Spacer.qml</file>
         <file>icons/home.svg</file>
         <file>icons/refresh.svg</file>
+        <file>qml/InactivityTimer.qml</file>
+        <file>qml/KioskDialog.qml</file>
+        <file>qml/KioskDialogButton.qml</file>
+        <file>icons/zoom-in.svg</file>
+        <file>fonts/avenir_next_lt_pro_bold.otf</file>
+        <file>fonts/avenir_next_lt_pro_it.otf</file>
+        <file>fonts/avenir_next_lt_pro_regular.otf</file>
+        <file>qml/AvenirFonts/AvenirFonts.qml</file>
+        <file>qml/AvenirFonts/qmldir</file>
     </qresource>
 </RCC>

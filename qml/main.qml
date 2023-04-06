@@ -25,6 +25,11 @@ Window {
         }
     }
 
+    InactivityTimer {
+        inactivyDelay: 300
+        lastSeconds: 20
+    }
+
     Universal.theme: Universal.Dark
     Universal.accent: Universal.Violet
 
@@ -52,28 +57,28 @@ Window {
                     Layout.alignment: Qt.AlignLeft
 
                     KioskButton {
-                        icon.source: "icons/back.png"
+                        icon.source: "../icons/back.png"
                         onClicked: webEngine.goBack()
                         tooltip: "Précédent"
                         disabled: !webEngine.canGoBack
                     }
 
                     KioskButton {
-                        icon.source: "icons/forward.png"
+                        icon.source: "../icons/forward.png"
                         onClicked: webEngine.goForward()
                         tooltip: "Précédent"
                         disabled: !webEngine.canGoForward
                     }
 
                     KioskButton {
-                        icon.source: "icons/refresh.svg"
+                        icon.source: "../icons/refresh.svg"
                         onClicked: webEngine.reloadAndBypassCache()
                         tooltip: "Recharger la page"
                         disabled: webEngine.loading
                     }
 
                     KioskButton {
-                        icon.source: "icons/home.svg"
+                        icon.source: "../icons/home.svg"
                         onClicked: webEngine.goHome()
                         tooltip: "Retourner à la page d'accueuil"
                         disabled: false
@@ -86,10 +91,13 @@ Window {
                     Layout.alignment: Qt.AlignHCenter
                     id: control
                     text: "Fermer la session"
-                    icon.source: "icons/session-close.png"
+                    icon.source: "../icons/session-close.png"
                     padding: 10
                     tooltip: "Fermer la session"
-                    onClicked: Process.disconnect()
+                    onClicked: {
+                        Process.disconnect()
+                        Qt.quit()
+                    }
 
                     contentItem: RowLayout {
 
@@ -114,7 +122,7 @@ Window {
                 Row {
                     Layout.alignment: Qt.AlignRight
                     KioskButton {
-                        icon.source: "icons/zoom-out.png"
+                        icon.source: "../icons/zoom-out.svg"
                         tooltip: "Zoom arrière"
                         onClicked: {
                             let newZoomFactor = webEngine.zoomFactor - 0.1
@@ -155,7 +163,7 @@ Window {
                     }
 
                     KioskButton {
-                        icon.source: "icons/zoom-in.png"
+                        icon.source: "../icons/zoom-in.svg"
                         tooltip: "Zoom avant"
                         onClicked: {
                             let newZoomFactor = webEngine.zoomFactor + 0.1
@@ -199,6 +207,7 @@ Window {
                 onFileDialogRequested: function (request) {
                     showMessage("Le téléversement de fichiers n'est pas autorisé")
                     request.accepted = true
+                    request.dialogReject()
                 }
 
                 onNewViewRequested: function (request) {
@@ -228,14 +237,11 @@ Window {
                     messageDialog.text = text
 
                     messageDialog.open()
-                    messageDialog.setX(
-                                Screen.width / 2 - messageDialog.width / 2)
-                    messageDialog.setY(
-                                Screen.height / 2 - messageDialog.height / 2)
                 }
 
-                MessageDialog {
+                KioskDialog {
                     id: messageDialog
+                    title: "Avertissement"
                 }
 
                 Timer {

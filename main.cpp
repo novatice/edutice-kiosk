@@ -7,6 +7,7 @@
 #include <QtQuickControls2/QQuickStyle>
 #include <QtWebEngine/QtWebEngine>
 
+#include "inactivity-filter.h"
 #include "process.h"
 
 static QObject *get_process_singleton(QQmlEngine *engine,
@@ -24,6 +25,19 @@ QString normalizeUrl(QString url) {
   }
 
   return "https://" + url;
+}
+
+// this has to be declared here because Qt 5.12 qmlRegisterSingletonType doesn't
+// support usage of lambda if we update, trying to put this in main and use a
+// lambda would be good
+InactivityFilter *keyEater = new InactivityFilter();
+
+static QObject *get_inactivity_filter(QQmlEngine *engine,
+                                      QJSEngine *scriptEngine) {
+  // Q_UNUSED(engine)
+  Q_UNUSED(scriptEngine)
+
+  return keyEater;
 }
 
 int main(int argc, char *argv[]) {
@@ -80,10 +94,17 @@ int main(int argc, char *argv[]) {
 
       QQmlApplicationEngine engine;
 
+      engine.addImportPath("qrc:/qml/"); /* Insert relative path to your
+                                                import directory here */
+
       qmlRegisterSingletonType<Process>("Process", 1, 0, "Process",
                                         get_process_singleton);
 
-      const QUrl qmlUrl(QStringLiteral("qrc:/main.qml"));
+      qmlRegisterSingletonType<InactivityFilter>("InactivityWatcher", 1, 0,
+                                                 "InactivityWatcher",
+                                                 get_inactivity_filter);
+
+      const QUrl qmlUrl(QStringLiteral("qrc:/qml/main.qml"));
       QObject::connect(
           &engine, &QQmlApplicationEngine::objectCreated, &app,
           [qmlUrl](QObject *obj, const QUrl &objUrl) {
@@ -97,6 +118,8 @@ int main(int argc, char *argv[]) {
       logger.debug() << "just before start";
 
       engine.load(qmlUrl);
+
+      app.installEventFilter(keyEater);
 
       return app.exec();
 

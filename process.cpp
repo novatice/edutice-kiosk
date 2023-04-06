@@ -11,7 +11,7 @@ void handler(QProcess::ProcessState state) {}
 
 Process::Process(QObject *parent, QQmlEngine *engine)
     : QObject{parent}, m_process(new QProcess(this)) {
-    m_engine=engine;
+  m_engine = engine;
 }
 
 void Process::start(const QString &program) {
@@ -23,12 +23,11 @@ void Process::start(const QString &program) {
   }
 }
 
-void Process::disconnect (){
+void Process::disconnect() {
 #ifdef __linux__
-    m_engine->quit();
 #elif _WIN32
-    m_process->startDetached("shutdown -L");
-    m_process->waitForFinished(-1);
+  m_process->startDetached("shutdown -L");
+  m_process->waitForFinished(-1);
 #endif
 }
 
