@@ -19,7 +19,7 @@ Dialog {
     modal: true
     closePolicy: "NoAutoClose"
     // signal onAccepted
-    signal onCanceled
+    signal canceled
 
     background: Rectangle {
         border.color: "transparent"
@@ -50,20 +50,22 @@ Dialog {
                 font.pointSize: 12
                 Layout.columnSpan: 2
                 Layout.alignment: Qt.AlignRight
+                Layout.minimumWidth: root.parent.width / 8
                 Layout.maximumWidth: root.parent.width / 4
-                horizontalAlignment: Qt.AlignLeft
+                horizontalAlignment: Qt.AlignCenter
             }
         }
 
         RowLayout {
 
-            Layout.alignment: Qt.AlignRight
+            Layout.alignment: Qt.AlignCenter
+            spacing: 30
 
             KioskDialogButton {
                 id: cancelBtn
                 text: "Annuler"
                 onClicked: {
-                    root.onCancel()
+                    root.canceled()
                     close()
                 }
                 visible: withCancelButton
@@ -73,7 +75,7 @@ Dialog {
                 id: acceptBtn
                 text: "Ok"
                 onClicked: {
-                    root.onAccepted()
+                    root.accepted()
                     close()
                 }
             }

@@ -1,7 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>qml/main.qml</file>
-        <file>icons/session-close.png</file>
         <file>icons/back.png</file>
         <file>icons/forward.png</file>
         <file>icons/zoom-out.svg</file>
@@ -18,5 +17,6 @@
         <file>fonts/avenir_next_lt_pro_regular.otf</file>
         <file>qml/AvenirFonts/AvenirFonts.qml</file>
         <file>qml/AvenirFonts/qmldir</file>
+        <file>icons/close.png</file>
     </qresource>
 </RCC>

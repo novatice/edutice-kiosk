@@ -16,6 +16,14 @@ Item {
         return `Sans action de votre part la borne de consultation se fermera dans ${lastSecondsTimer.seconds} seconde(s).`
     }
 
+    function start() {
+        inactivityTimer.restart()
+    }
+
+    function stop() {
+        inactivityTimer.stop()
+    }
+
     Connections {
         target: InactivityWatcher
         onEventRaised: {

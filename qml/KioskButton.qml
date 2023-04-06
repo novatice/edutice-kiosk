@@ -11,7 +11,9 @@ Button {
         color: "transparent"
     }
 
-    icon.color: disabled ? "gray" : "white"
+    icon.color: disabled ? "gray" : "transparent"
+    icon.width: 32
+    icon.height: 32
 
     MouseArea {
         id: ma

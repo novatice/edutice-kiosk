@@ -26,8 +26,25 @@ Window {
     }
 
     InactivityTimer {
+        id: inactivityTimer
         inactivyDelay: 300
         lastSeconds: 20
+    }
+
+    KioskDialog {
+        id: closeDialog
+        title: "Fermeture"
+        withCancelButton: true
+        acceptText: "Confirmer"
+        text: "La borne va être fermée.\nConfirmez vous cette opération ?"
+        onAccepted: {
+            Process.disconnect()
+            Qt.quit()
+        }
+
+        onCanceled: {
+            inactivityTimer.start()
+        }
     }
 
     Universal.theme: Universal.Dark
@@ -50,11 +67,11 @@ Window {
 
                 height: parent.height
                 width: parent.width
-                Layout.alignment: Qt.AlignCenter
+                Layout.alignment: Qt.AlignVCenter
 
-                Row {
+                RowLayout {
 
-                    Layout.alignment: Qt.AlignLeft
+                    Layout.alignment: Qt.AlignVCenter
 
                     KioskButton {
                         icon.source: "../icons/back.png"
@@ -87,40 +104,9 @@ Window {
 
                 Spacer {}
 
-                KioskButton {
-                    Layout.alignment: Qt.AlignHCenter
-                    id: control
-                    text: "Fermer la session"
-                    icon.source: "../icons/session-close.png"
-                    padding: 10
-                    tooltip: "Fermer la session"
-                    onClicked: {
-                        Process.disconnect()
-                        Qt.quit()
-                    }
+                RowLayout {
+                    Layout.alignment: Qt.AlignVCenter
 
-                    contentItem: RowLayout {
-
-                        Image {
-                            source: control.icon.source
-                        }
-
-                        Text {
-                            text: control.text
-                            color: "white"
-                        }
-                    }
-
-                    background: Rectangle {
-                        color: "#4A5B7B"
-                        radius: 50
-                    }
-                }
-
-                Spacer {}
-
-                Row {
-                    Layout.alignment: Qt.AlignRight
                     KioskButton {
                         icon.source: "../icons/zoom-out.svg"
                         tooltip: "Zoom arrière"
@@ -169,6 +155,16 @@ Window {
                             let newZoomFactor = webEngine.zoomFactor + 0.1
                             webEngine.zoomFactor = newZoomFactor
                             webEngine.zoomFactor = newZoomFactor
+                        }
+                    }
+
+                    KioskButton {
+                        id: closeButton
+                        icon.source: "../icons/close.png"
+                        tooltip: "Quitter"
+                        onClicked: {
+                            inactivityTimer.stop()
+                            closeDialog.open()
                         }
                     }
                 }
