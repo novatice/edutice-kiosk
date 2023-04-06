@@ -28,8 +28,8 @@ QString normalizeUrl(QString url) {
 }
 
 // this has to be declared here because Qt 5.12 qmlRegisterSingletonType doesn't
-// support usage of lambda if we update, trying to put this in main and use a
-// lambda would be good
+// support usage of lambda
+// if we update, trying to put this in main and use a lambda would be good
 InactivityFilter *keyEater = new InactivityFilter();
 
 static QObject *get_inactivity_filter(QQmlEngine *engine,
@@ -78,6 +78,7 @@ int main(int argc, char *argv[]) {
 
       QJsonValue urlValue = configuration.value("url");
       QJsonValue totemValue = configuration.value("totem");
+      bool automaticMode = configuration.value("automatic").toBool();
 
       if (urlValue.isUndefined()) {
         logger.critical() << "Unable to find \"url\" key in configuration";
@@ -114,6 +115,7 @@ int main(int argc, char *argv[]) {
           Qt::QueuedConnection);
       engine.rootContext()->setContextProperty("urlToLoad", url);
       engine.rootContext()->setContextProperty("totem", totem);
+      engine.rootContext()->setContextProperty("automatic", automaticMode);
 
       logger.debug() << "just before start";
 
