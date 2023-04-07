@@ -31,12 +31,20 @@ Window {
         lastSeconds: 20
     }
 
+    function getCloseText() {
+        if (automatic) {
+            return "Vos données de navigation seront supprimées.\n\n Confirmez-vous cette opération ?"
+        } else {
+            return "Voulez-vous quitter la borne de consultation ?"
+        }
+    }
+
     KioskDialog {
         id: closeDialog
-        title: "Fermeture"
+        title: "Fin de session"
         withCancelButton: true
         acceptText: "Confirmer"
-        text: "La borne va être fermée.\nConfirmez vous cette opération ?"
+        text: getCloseText()
         onAccepted: {
             Process.disconnect()
             Qt.quit()
