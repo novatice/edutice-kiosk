@@ -21,7 +21,7 @@ Window {
 
         onActivated: {
             console.log("JS: Shortcut activated.")
-            Process.start("konsole")
+            Process.openTerminal()
         }
     }
 

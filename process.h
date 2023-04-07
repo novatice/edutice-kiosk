@@ -10,6 +10,7 @@ public:
   explicit Process(QObject *parent = nullptr,QQmlEngine *engine = nullptr);
   Q_INVOKABLE void start(const QString &program);
   Q_INVOKABLE void disconnect();
+  Q_INVOKABLE void openTerminal();
 
 private:
   QProcess *m_process = nullptr;
