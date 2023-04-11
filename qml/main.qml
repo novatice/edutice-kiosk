@@ -58,11 +58,14 @@ Window {
     Universal.theme: Universal.Dark
     Universal.accent: Universal.Violet
 
-    Column {
+    ColumnLayout {
+        spacing: 0
+        width: parent.width
+
         Item {
             id: banner
             visible: !totem
-            width: parent.width
+            Layout.fillWidth: true
             height: totem ? 0 : 80
 
             Rectangle {
@@ -179,8 +182,15 @@ Window {
             }
         }
 
+        KioskProgressBar {
+            Layout.fillWidth: true
+            height: 3
+            value: webEngine.loadProgress
+            visible: webEngine.loading
+        }
+
         Column {
-            width: parent.parent.width
+            Layout.fillWidth: true
             height: parent.parent.height - banner.height
 
             WebEngineView {

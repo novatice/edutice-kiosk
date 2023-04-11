@@ -18,5 +18,6 @@
         <file>qml/AvenirFonts/AvenirFonts.qml</file>
         <file>qml/AvenirFonts/qmldir</file>
         <file>icons/close.png</file>
+        <file>qml/KioskProgressBar.qml</file>
     </qresource>
 </RCC>
