@@ -1,14 +1,25 @@
 pragma Singleton
 
+import QtQml 2.0
 import QtQuick 2.12
 
 QtObject {
 
+
+    /*
     readonly property FontLoader regularLoader: FontLoader {
         id: regularLoader
         source: "qrc:/fonts/avenir_next_lt_pro_regular.otf"
     }
 
+    readonly property FontMetrics regularMetrics: FontMetrics {
+        id: metrics
+        font.family: regularLoader.name
+    }
+    */
+
+
+    /*
     readonly property FontLoader boldLoader: FontLoader {
         id: boldLoader
         source: "qrc:/fonts/avenir_next_lt_pro_bold.otf"
@@ -21,9 +32,16 @@ QtObject {
 
     Component.onCompleted: {
         console.log("youpi")
+    }*/
+    readonly property AvenirFont regular: AvenirFont {
+        source: "qrc:/fonts/avenir_next_lt_pro_regular.otf"
     }
 
-    readonly property string regular: regularLoader.name
-    readonly property string bold: boldLoader.name
-    readonly property string italic: italicLoader.name
+    readonly property AvenirFont bold: AvenirFont {
+        source: "qrc:/fonts/avenir_next_lt_pro_bold.otf"
+    }
+
+    readonly property AvenirFont italic: AvenirFont {
+        source: "qrc:/fonts/avenir_next_lt_pro_it.otf"
+    }
 }

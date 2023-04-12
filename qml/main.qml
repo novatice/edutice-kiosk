@@ -7,6 +7,7 @@ import QtQuick.Controls.Universal 2.12
 import QtQml 2.12
 import QtWebEngine 1.8
 import Process 1.0
+import AvenirFonts 1.0
 
 Window {
     width: Screen.width
@@ -134,8 +135,8 @@ Window {
                         text: (webEngine.zoomFactor * 100).toFixed(0) + "%"
                         tooltip: "Réinitialiser le zoom"
                         contentItem: Item {
-                            implicitHeight: text.implicitHeight + 10
-                            implicitWidth: text.implicitWidth + 20
+                            implicitHeight: text.height + 10
+                            implicitWidth: text.width + 30
 
                             Rectangle {
                                 anchors.fill: parent
@@ -150,6 +151,10 @@ Window {
                                 id: text
                                 anchors.centerIn: parent
                                 text: zoom.text
+                                horizontalAlignment: Text.AlignHCenter
+                                font.family: AvenirFonts.regular.name
+                                width: AvenirFonts.regular.metrics.boundingRect(
+                                           "100%").width
                                 color: "white"
                             }
                         }

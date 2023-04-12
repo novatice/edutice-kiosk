@@ -1,6 +1,7 @@
 import QtQml 2.12
 import QtQuick 2.12
 import QtQuick.Controls 2.12
+import AvenirFonts 1.0
 
 Button {
     property bool disabled: false
@@ -35,6 +36,7 @@ Button {
         }
     }
 
-    ToolTip.visible: this.hovered
+    ToolTip.visible: this.hovered && this.tooltip
     ToolTip.text: tooltip
+    ToolTip.toolTip.font.family: AvenirFonts.regular.name
 }

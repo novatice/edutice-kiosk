@@ -30,7 +30,7 @@ Dialog {
         text: root.title
         horizontalAlignment: Qt.AlignHCenter
 
-        font.family: AvenirFonts.bold
+        font.family: AvenirFonts.bold.name
         font.pointSize: 18
         padding: 12
         color: "#3b78bc"
@@ -45,7 +45,7 @@ Dialog {
 
             Label {
                 id: contentLabel
-                font.family: AvenirFonts.regular
+                font.family: AvenirFonts.regular.name
                 wrapMode: "WordWrap"
                 font.pointSize: 12
                 Layout.columnSpan: 2
