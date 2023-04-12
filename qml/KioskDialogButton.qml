@@ -2,8 +2,9 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import AvenirFonts 1.0
 
-Button {
+KioskButton {
     id: root
+
     contentItem: Text {
         text: root.text
         font.family: AvenirFonts.regular.name
