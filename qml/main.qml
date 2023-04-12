@@ -61,6 +61,7 @@ Window {
     ColumnLayout {
         spacing: 0
         width: parent.width
+        height: parent.height
 
         Item {
             id: banner
@@ -191,7 +192,7 @@ Window {
 
         Column {
             Layout.fillWidth: true
-            height: parent.parent.height - banner.height
+            Layout.fillHeight: true
 
             WebEngineView {
                 property string homeUrl: urlToLoad
