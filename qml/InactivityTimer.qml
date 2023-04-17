@@ -7,9 +7,12 @@ import Process 1.0
 Item {
     property int inactivyDelay: 300
     property int lastSeconds: 20
+    property bool enabled: true
 
     Component.onCompleted: {
-        inactivityTimer.start()
+        if (this.enabled) {
+            inactivityTimer.start()
+        }
     }
 
     function getInactivityText() {
@@ -31,7 +34,7 @@ Item {
     Connections {
         target: InactivityWatcher
         onEventRaised: {
-            if (inactivityTimer.running) {
+            if (enabled && inactivityTimer.running) {
                 inactivityTimer.restart()
             }
         }

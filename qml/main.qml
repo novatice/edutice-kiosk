@@ -30,6 +30,7 @@ Window {
         id: inactivityTimer
         inactivyDelay: 300
         lastSeconds: 20
+        enabled: !totem
     }
 
     function getCloseText() {
@@ -52,7 +53,9 @@ Window {
         }
 
         onCanceled: {
-            inactivityTimer.start()
+            if (!totem) {
+                inactivityTimer.start()
+            }
         }
     }
 

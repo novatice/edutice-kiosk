@@ -121,7 +121,9 @@ int main(int argc, char *argv[]) {
 
       engine.load(qmlUrl);
 
-      app.installEventFilter(keyEater);
+      if (!totem) {
+        app.installEventFilter(keyEater);
+      }
 
       return app.exec();
 
