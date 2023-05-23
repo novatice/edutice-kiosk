@@ -42,6 +42,7 @@ Dialog {
         spacing: 20
 
         RowLayout {
+            Layout.alignment: Qt.AlignCenter
 
             Label {
                 id: contentLabel
