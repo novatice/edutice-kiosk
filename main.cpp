@@ -113,6 +113,8 @@ int main(int argc, char *argv[]) {
               QCoreApplication::exit(-1);
           },
           Qt::QueuedConnection);
+      Process *process = new Process(&engine);
+      QObject::connect(QCoreApplication::instance(),SIGNAL(aboutToQuit()), process, SLOT(disconnect()));
       engine.rootContext()->setContextProperty("urlToLoad", url);
       engine.rootContext()->setContextProperty("totem", totem);
       engine.rootContext()->setContextProperty("automatic", automaticMode);
