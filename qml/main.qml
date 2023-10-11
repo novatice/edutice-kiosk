@@ -208,11 +208,17 @@ Window {
                 width: parent.width
                 height: parent.height
                 profile.httpCacheType: WebEngineProfile.NoCache
+                profile.httpAcceptLanguage: getLocaleAsAcceptLanguage()
 
                 id: webEngine
 
                 function goHome() {
                     url = homeUrl
+                }
+
+                function getLocaleAsAcceptLanguage() {
+                    const locale = Qt.locale()
+                    return locale.name.replace("_", "-")
                 }
 
                 onContextMenuRequested: function (request) {
