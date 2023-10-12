@@ -191,16 +191,18 @@ Window {
             }
         }
 
-        KioskProgressBar {
-            Layout.fillWidth: true
-            height: 3
-            value: webEngine.loadProgress
-            visible: webEngine.loading
-        }
-
-        Column {
+        Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
+
+            KioskProgressBar {
+                width: parent.width
+                height: 5
+                z: 1
+                value: webEngine.loadProgress
+                visible: webEngine.loading
+                anchors.top: parent.top
+            }
 
             WebEngineView {
                 property string homeUrl: urlToLoad

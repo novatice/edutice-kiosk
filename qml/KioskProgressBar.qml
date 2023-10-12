@@ -5,6 +5,13 @@ import QtQml 2.12
 ProgressBar {
     id: root
 
+    background: Rectangle {
+        implicitWidth: root.width
+        implicitHeight: root.height
+        color: "#e6e6e6"
+        radius: 3
+    }
+
     contentItem: Item {
 
         Rectangle {
