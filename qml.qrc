@@ -20,5 +20,6 @@
         <file>icons/close.png</file>
         <file>qml/KioskProgressBar.qml</file>
         <file>qml/AvenirFonts/AvenirFont.qml</file>
+        <file>icons/brush.svg</file>
     </qresource>
 </RCC>

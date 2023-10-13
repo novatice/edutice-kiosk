@@ -118,6 +118,121 @@ Window {
                     }
                 }
 
+                KioskButton {
+                    readonly property int maxIconSize: 48
+                    readonly property int minIconSize: 32
+                    property int iconSize: maxIconSize
+                    property bool disabled: webEngine.firstLoad
+                    visible: automatic
+
+                    id: cleanBtn
+                    //visible: !webEngine.firstLoad
+                    text: "Nettoyer mes données !"
+
+                    icon.height: iconSize
+                    icon.width: iconSize
+
+                    icon.source: "../icons/brush.svg"
+
+                    // this undocumented, found at https://stackoverflow.com/a/64128167
+                    palette.buttonText: "white"
+
+                    contentItem: RowLayout {
+
+                        id: contentItem
+
+                        SequentialAnimation {
+                            NumberAnimation {
+                                target: cleanBtn
+                                property: "iconSize"
+                                //loops: Animation.Infinite
+                                duration: 1000
+
+                                from: cleanBtn.minIconSize
+                                easing.type: Easing.Bezier
+                                to: cleanBtn.maxIconSize
+                            }
+
+                            NumberAnimation {
+                                target: cleanBtn
+                                property: "iconSize"
+                                //loops: Animation.Infinite
+                                duration: 1000
+
+                                to: cleanBtn.minIconSize
+                                easing.type: Easing.Bezier
+                                from: cleanBtn.maxIconSize
+                            }
+                            running: !cleanBtn.disabled
+                            loops: Animation.Infinite
+                        }
+
+                        // take the max of the size so button doesn't change size when animation runs
+                        Item {
+                            width: cleanBtn.maxIconSize
+                            height: cleanBtn.maxIconSize
+
+                            Image {
+                                source: "../icons/brush.svg"
+
+                                sourceSize.width: cleanBtn.iconSize
+                                sourceSize.height: cleanBtn.iconSize
+                                anchors.centerIn: parent
+                            }
+                        }
+
+                        SequentialAnimation {
+                            NumberAnimation {
+                                target: cleanTextItem
+                                property: "implicitWidth"
+                                duration: 200
+
+                                from: 0
+                                easing.type: Easing.Linear
+                                to: cleanText.implicitWidth
+                            }
+
+                            PropertyAnimation {
+                                target: cleanText
+                                property: "visible"
+                                from: false
+                                to: true
+                            }
+
+                            running: !cleanBtn.disabled
+                        }
+
+                        Item {
+                            id: cleanTextItem
+
+                            implicitWidth: 0
+                            implicitHeight: cleanBtn.disabled ? 0 : cleanText.implicitHeight
+                            Text {
+                                id: cleanText
+                                text: "Nettoyer mes données !"
+                                padding: 0
+                                visible: false
+                                color: "white"
+                            }
+                        }
+                    }
+
+                    background: Rectangle {
+                        width: cleanBtn.width
+                        color: cleanBtn.disabled ? "green" : "#F89345"
+                        radius: 32
+                    }
+
+                    leftPadding: 0
+                    rightPadding: !cleanBtn.disabled ? 10 : 0
+                    verticalPadding: 0
+
+                    onClicked: {
+                        Process.disconnect()
+                        Qt.quit()
+                    }
+                }
+
                 Spacer {}
 
                 RowLayout {
@@ -181,6 +296,7 @@ Window {
                     KioskButton {
                         id: closeButton
                         icon.source: "../icons/close.png"
+                        visible: !automatic
                         tooltip: "Quitter"
                         onClicked: {
                             inactivityTimer.stop()
@@ -206,12 +322,13 @@ Window {
 
             WebEngineView {
                 property string homeUrl: urlToLoad
+                property bool firstLoad: true
 
                 width: parent.width
                 height: parent.height
+
                 profile.httpCacheType: WebEngineProfile.NoCache
                 profile.httpAcceptLanguage: getLocaleAsAcceptLanguage()
-
                 id: webEngine
 
                 function goHome() {
@@ -249,10 +366,15 @@ Window {
 
                 onNavigationRequested: function (request) {
                     var urlStr = request.url.toString()
+                    console.log("trying to navigate to: ", urlStr)
                     // ignore mailto and other
                     if (!(urlStr.startsWith("http://") || urlStr.startsWith(
                               "https://"))) {
                         request.action = WebEngineNavigationRequest.IgnoreRequest
+                    } else {
+                        if (firstLoad) {
+                            firstLoad = urlStr === urlToLoad
+                        }
                     }
                 }
 
