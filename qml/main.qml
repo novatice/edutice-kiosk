@@ -15,6 +15,11 @@ Window {
     visible: true
     flags: Qt.FramelessWindowHint | Qt.Window
     visibility: Qt.WindowFullScreen
+    Component.onCompleted: {
+        if (!automatic) {
+            dataDialog.open()
+        }
+    }
 
     Shortcut {
         context: Qt.ApplicationShortcut
@@ -38,6 +43,24 @@ Window {
             return "Vos données de navigation seront supprimées.\n\n Confirmez-vous cette opération ?"
         } else {
             return "Voulez-vous quitter la borne de consultation ?"
+        }
+    }
+
+    KioskDialog {
+        Timer {
+            id: dataTimer
+            interval: 10000
+            onTriggered: {
+                bubbleAnimationDisappear.start()
+            }
+        }
+
+        id: dataDialog
+        title: "Données de navigation"
+        acceptText: "Ok"
+        text: "Pensez à fermer votre session afin de procéder au nettoyage de vos données de navigation !"
+        onAccepted: {
+            bubbleAnimationAppear.start()
         }
     }
 
@@ -71,7 +94,10 @@ Window {
             id: banner
             visible: !totem
             Layout.fillWidth: true
-            height: totem ? 0 : 80
+            height: totem ? 0 : 60
+            // allow bubble on close button to be visible
+            // maybe it would be better to use an overlay ?
+            z: 1
 
             Rectangle {
                 color: "#444B69"
@@ -84,6 +110,11 @@ Window {
                 height: parent.height
                 width: parent.width
                 Layout.alignment: Qt.AlignVCenter
+
+                // use this item to add padding to layout
+                Item {
+                    width: 5
+                }
 
                 RowLayout {
 
@@ -142,6 +173,7 @@ Window {
                         id: contentItem
 
                         SequentialAnimation {
+
                             NumberAnimation {
                                 target: cleanBtn
                                 property: "iconSize"
@@ -241,6 +273,7 @@ Window {
                     KioskButton {
                         icon.source: "../icons/zoom-out.svg"
                         tooltip: "Zoom arrière"
+
                         onClicked: {
                             let newZoomFactor = webEngine.zoomFactor - 0.1
                             webEngine.zoomFactor = newZoomFactor
@@ -293,15 +326,124 @@ Window {
                         }
                     }
 
-                    KioskButton {
-                        id: closeButton
-                        icon.source: "../icons/close.png"
+                    Item {
+                        width: closeButton.width
+                        height: closeButton.height
                         visible: !automatic
-                        tooltip: "Quitter"
-                        onClicked: {
-                            inactivityTimer.stop()
-                            closeDialog.open()
+
+                        KioskButton {
+                            id: closeButton
+                            icon.source: "../icons/close.png"
+                            tooltip: "Quitter"
+
+                            onClicked: {
+                                inactivityTimer.stop()
+                                closeDialog.open()
+                            }
                         }
+
+                        SequentialAnimation {
+                            id: bubbleAnimationDisappear
+                            NumberAnimation {
+                                target: bubble
+                                property: "opacity"
+                                duration: 1000
+
+                                from: 1
+                                easing.type: Easing.Linear
+                                to: 0
+                            }
+
+                            PropertyAnimation {
+                                target: cleanText
+                                property: "visible"
+                                from: true
+                                to: false
+                            }
+                        }
+
+                        SequentialAnimation {
+                            id: bubbleAnimationAppear
+
+                            PropertyAnimation {
+                                target: bubble
+                                property: "visible"
+                                from: false
+                                to: true
+                            }
+
+                            NumberAnimation {
+                                target: bubble
+                                property: "opacity"
+                                duration: 1000
+
+                                from: 0
+                                easing.type: Easing.Linear
+                                to: 1
+                            }
+
+                            onFinished: function () {
+                                dataTimer.start()
+                            }
+
+                            //running: true
+                        }
+
+                        Item {
+                            id: bubble
+                            width: bubbleText.width
+                            height: bubbleText.height
+                            anchors.topMargin: 15
+                            anchors.rightMargin: -5
+                            anchors.top: parent.bottom
+                            anchors.right: parent.right
+                            opacity: 0
+
+                            Rectangle {
+                                color: "#41B146"
+                                width: parent.width
+                                height: parent.height
+                                radius: 10
+                            }
+
+                            Text {
+                                id: bubbleText
+                                text: "Cliquez sur ce bouton pour fermer votre session !"
+                                color: "white"
+                                padding: 15
+                            }
+
+                            Canvas {
+                                id: bubbleCanvas
+                                width: 30
+                                height: 15
+                                antialiasing: true
+                                anchors.bottom: parent.top
+                                anchors.right: parent.right
+
+                                anchors.rightMargin: closeButton.width / 2 - bubbleCanvas.width / 2
+                                                     - parent.anchors.rightMargin
+                                onPaint: {
+                                    var ctx = getContext("2d")
+
+                                    // the equliteral triangle
+                                    ctx.beginPath()
+                                    ctx.moveTo(0, bubbleCanvas.height)
+                                    ctx.lineTo(bubbleCanvas.width / 2, 0)
+                                    ctx.lineTo(bubbleCanvas.width,
+                                               bubbleCanvas.height)
+                                    ctx.closePath()
+
+                                    // fill color
+                                    ctx.fillStyle = "#41B146"
+                                    ctx.fill()
+                                }
+                            }
+                        }
+                    }
+
+                    Item {
+                        width: 5
                     }
                 }
             }
