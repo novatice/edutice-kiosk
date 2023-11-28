@@ -470,6 +470,7 @@ Window {
                 height: parent.height
 
                 profile.httpCacheType: WebEngineProfile.NoCache
+                profile.persistentCookiesPolicy: WebEngineProfile.NoPersistentCookies
                 profile.httpAcceptLanguage: getLocaleAsAcceptLanguage()
                 id: webEngine
 
