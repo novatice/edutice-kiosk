@@ -144,7 +144,7 @@ Window {
                     KioskButton {
                         icon.source: "../icons/home.svg"
                         onClicked: webEngine.goHome()
-                        tooltip: "Retourner à la page d'accueuil"
+                        tooltip: "Retourner à la page d'accueil"
                         disabled: false
                     }
                 }
