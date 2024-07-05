@@ -1,11 +1,11 @@
-import QtQuick 2.12
-import QtQuick.Window 2.12
-import QtQuick.Layouts 1.12
-import QtQuick.Controls 2.12
-import QtQuick.Dialogs 1.3
-import QtQuick.Controls.Universal 2.12
-import QtQml 2.12
-import QtWebEngine 1.8
+import QtQuick
+import QtQuick.Window
+import QtQuick.Layouts
+import QtQuick.Controls.Basic
+import QtQuick.Dialogs
+import QtQuick.Controls.Universal
+import QtQml
+import QtWebEngine
 import Process 1.0
 import AvenirFonts 1.0
 
@@ -501,7 +501,7 @@ Window {
                     request.dialogReject()
                 }
 
-                onNewViewRequested: function (request) {
+                onNewWindowRequested: function (request) {
                     if (request.userInitiated) {
                         webEngine.url = request.requestedUrl
                     }

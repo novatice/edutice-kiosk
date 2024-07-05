@@ -5,7 +5,7 @@
 #include <QLocale>
 #include <QTranslator>
 #include <QtQuickControls2/QQuickStyle>
-#include <QtWebEngine/QtWebEngine>
+#include <QtWebEngineQuick/QtWebEngineQuick>
 
 #include "inactivity-filter.h"
 #include "process.h"
@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
 #endif
   QGuiApplication app(argc, argv);
 
-  QtWebEngine::initialize();
+  QtWebEngineQuick::initialize();
 
   QMessageLogger logger;
 

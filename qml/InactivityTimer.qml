@@ -1,6 +1,6 @@
-import QtQuick 2.12
-import QtQml 2.12
-import QtQuick.Dialogs 1.3
+import QtQuick
+import QtQml
+import QtQuick.Dialogs
 import InactivityWatcher 1.0
 import Process 1.0
 
@@ -33,7 +33,7 @@ Item {
 
     Connections {
         target: InactivityWatcher
-        onEventRaised: {
+        function onEventRaised () {
             if (enabled && inactivityTimer.running) {
                 inactivityTimer.restart()
             }

@@ -26,8 +26,11 @@ void Process::start(const QString &program) {
 void Process::disconnect() {
 #ifdef __linux__
 #elif _WIN32
+#ifdef QT_DEBUG
+#else
   m_process->startDetached("shutdown -L");
   m_process->waitForFinished(-1);
+#endif
 #endif
 }
 

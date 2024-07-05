@@ -1,6 +1,6 @@
-import QtQml 2.12
-import QtQuick 2.12
-import QtQuick.Controls 2.12
+import QtQml
+import QtQuick
+import QtQuick.Controls
 import AvenirFonts 1.0
 
 Button {
@@ -32,7 +32,7 @@ Button {
         }
 
         onClicked: {
-            control.onClicked()
+            control.clicked()
         }
     }
 
