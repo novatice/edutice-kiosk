@@ -10,6 +10,7 @@ import Process 1.0
 import AvenirFonts 1.0
 
 Window {
+
     width: Screen.width
     height: Screen.height
     visible: true
@@ -466,6 +467,7 @@ Window {
                 property string homeUrl: urlToLoad
                 property bool firstLoad: true
 
+
                 width: parent.width
                 height: parent.height
 
@@ -508,6 +510,7 @@ Window {
                 }
 
                 onNavigationRequested: function (request) {
+
                     var urlStr = request.url.toString()
                     console.log("trying to navigate to: ", urlStr)
                     // ignore mailto and other
@@ -520,6 +523,7 @@ Window {
                         }
                     }
                 }
+
 
                 onLoadingChanged: function (request) {
                     if (request.status === WebEngineView.LoadFailedStatus) {

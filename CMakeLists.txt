@@ -29,8 +29,8 @@ set (
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 REQUIRED COMPONENTS Core Quick WebEngineQuick QuickControls2)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick WebEngineQuick QuickControls2)
+find_package(QT NAMES Qt6 REQUIRED COMPONENTS Core Quick WebEngineQuick QuickControls2 Network)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick WebEngineQuick QuickControls2 Network)
 
 set(TS_FILES edutice-kiosk_fr_FR.ts)
 
@@ -54,6 +54,6 @@ target_compile_definitions(edutice-kiosk
 
 
 target_link_libraries(edutice-kiosk
-  PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick Qt${QT_VERSION_MAJOR}::WebEngineQuick Qt6::QuickControls2)
+  PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick Qt${QT_VERSION_MAJOR}::WebEngineQuick Qt6::QuickControls2 Qt${QT_VERSION_MAJOR}::Network)
 
 set_target_properties(edutice-kiosk PROPERTIES WIN32_EXECUTABLE TRUE)

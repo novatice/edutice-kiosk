@@ -9,6 +9,7 @@
 
 #include "inactivity-filter.h"
 #include "process.h"
+#include <iostream>
 
 static QObject *get_process_singleton(QQmlEngine *engine,
                                       QJSEngine *scriptEngine) {
@@ -39,15 +40,14 @@ static QObject *get_inactivity_filter(QQmlEngine *engine,
 
   return keyEater;
 }
-
 int main(int argc, char *argv[]) {
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
   QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
+  QtWebEngineQuick::initialize();
   QGuiApplication app(argc, argv);
 
-  QtWebEngineQuick::initialize();
 
   QMessageLogger logger;
 
@@ -65,6 +65,29 @@ int main(int argc, char *argv[]) {
 #elif _WIN32
   QFile configurationFile =
       QFile("C:\\Program Files\\Novatice Technologies\\kiosk\\webportal.txt");
+  //Parsing of proxy file and setup of proxy
+  QFile proxyFile = QFile("C:\\Program Files\\Novatice Technologies\\kiosk\\proxyPortal.txt");
+  if(proxyFile.exists()){
+      bool opened = proxyFile.open(QIODevice::ReadOnly);
+      if(opened){
+          QString content = proxyFile.readAll();
+          if(!content.isEmpty()){
+              QStringList proxyStrings = content.split(":");
+              if(proxyStrings.size()>2){
+                  logger.warning("ProxyPortal doesn't contain a correct address. No Proxy set up.");
+              }else{
+                  QNetworkProxy proxy;
+                  proxy.setType(QNetworkProxy::HttpCachingProxy);
+                  proxy.setHostName(proxyStrings[0]);
+                  proxy.setPort(proxyStrings[1].toInt());
+                  QNetworkProxy::setApplicationProxy(proxy);
+                  logger.info()<< "Proxy found" <<proxy.hostName() <<"on port:" << proxy.port();
+              }
+          }else{
+              logger.warning() << proxyFile.fileName() <<"is empty. No proxy set up.";
+          }
+      }
+  }
 #endif
   if (!configurationFile.exists()) {
     logger.critical() << "Unable to find configuration file";
@@ -135,3 +158,5 @@ int main(int argc, char *argv[]) {
     }
   }
 }
+
+
