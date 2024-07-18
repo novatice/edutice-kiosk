@@ -77,7 +77,7 @@ int main(int argc, char *argv[]) {
                   logger.warning("ProxyPortal doesn't contain a correct address. No Proxy set up.");
               }else{
                   QNetworkProxy proxy;
-                  proxy.setType(QNetworkProxy::HttpCachingProxy);
+                  proxy.setType(QNetworkProxy::HttpProxy);
                   proxy.setHostName(proxyStrings[0]);
                   proxy.setPort(proxyStrings[1].toInt());
                   QNetworkProxy::setApplicationProxy(proxy);
