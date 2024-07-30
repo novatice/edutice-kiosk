@@ -35,6 +35,8 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick WebEngineQuick
 set(TS_FILES edutice-kiosk_fr_FR.ts)
 
 set(PROJECT_SOURCES
+        config.h
+        config.cpp
         main.cpp
         process.cpp
         inactivity-filter.cpp

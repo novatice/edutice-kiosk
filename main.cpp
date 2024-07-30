@@ -9,7 +9,7 @@
 
 #include "inactivity-filter.h"
 #include "process.h"
-#include <iostream>
+#include "config.h"
 
 static QObject *get_process_singleton(QQmlEngine *engine,
                                       QJSEngine *scriptEngine) {
@@ -88,6 +88,9 @@ int main(int argc, char *argv[]) {
           }
       }
   }
+  Config* deviceConfig = Config::GetDeviceConfig();
+
+
 #endif
   if (!configurationFile.exists()) {
     logger.critical() << "Unable to find configuration file";
@@ -141,6 +144,7 @@ int main(int argc, char *argv[]) {
       engine.rootContext()->setContextProperty("urlToLoad", url);
       engine.rootContext()->setContextProperty("totem", totem);
       engine.rootContext()->setContextProperty("automatic", automaticMode);
+      engine.rootContext()->setContextProperty("deviceConfig",deviceConfig);
 
       logger.debug() << "just before start";
 

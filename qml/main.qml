@@ -516,11 +516,21 @@ Window {
                     // ignore mailto and other
                     if (!(urlStr.startsWith("http://") || urlStr.startsWith(
                               "https://"))) {
-                        request.action = WebEngineNavigationRequest.IgnoreRequest
+                        request.action = WebEngineNavigationRequest.reject()
                     } else {
                         if (firstLoad) {
                             firstLoad = urlStr === urlToLoad
                         }
+                        if(deviceConfig !== undefined){
+                            const urlAfterParameters = deviceConfig.addNeosUrlParameters(urlStr)
+                            if(urlAfterParameters !== urlStr){
+                                webEngine.url = urlAfterParameters
+                                request.reject()
+                            }else{
+                                request.accept()
+                            }
+                        }
+
                     }
                 }
 
