@@ -37,6 +37,13 @@ QString GetStringFromReg(HKEY hKey, std::wstring path, std::wstring value)
     return QString::fromWCharArray(data.c_str());
 }
 
+Config::Config(const QString &serverAddress, const QString &deviceUuid)
+    : _serverAddress(serverAddress)
+    , _deviceUuid(deviceUuid)
+{
+    _arguments = "?kiosk=true&deviceUuid=" + _deviceUuid.toStdString();
+}
+
 const QString Config::addNeosUrlParameters(QString url)
 {
     if (url.isNull() || url.isEmpty()) {
@@ -66,19 +73,24 @@ const QString Config::addNeosUrlParameters(QString url)
         }
         // we add 5 to the position for the number of characters in '/neos'
         insertPos += 5;
+        if (insertPos > urlStr.size()) {
+            throw std::invalid_argument("Url is smaller than insert position");
+        }
+        size_t argPos = urlStr.find('?', insertPos);
+        if (argPos != std::string::npos) {
+            //we want to add our arguments before the arguments that are already present
+            //we erase the current '?'
+            urlStr.erase(argPos, 1);
+            //we append w/ '&' to seperate the current and added arguments
+            _arguments.append("&");
+            urlStr.insert(argPos, _arguments);
+        }
         urlStr.insert(insertPos, _arguments);
         return QString(urlStr.c_str());
     } catch (const std::exception &e) {
         qCritical("Couldn't add NEOS  arguments %s \\n Using original url", e.what());
         return url;
     }
-}
-
-Config::Config(const QString &serverAddress, const QString &deviceUuid)
-    : _serverAddress(serverAddress)
-    , _deviceUuid(deviceUuid)
-{
-    _arguments = "?kiosk=true&deviceUuid=" + _deviceUuid.toStdString();
 }
 
 Config *Config::GetDeviceConfig()

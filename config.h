@@ -13,8 +13,12 @@ public:
 
     const QString &GetServerAddress() { return _serverAddress; }
     const QString &GetDeviceUuid() { return _deviceUuid; }
+
+    //Adds the kiosk arguments to the url to be recognized as such
+    //@param param1 url string to change
     Q_INVOKABLE const QString addNeosUrlParameters(QString url);
 
+    //Gets device's config from NEOS Registry keys
     static Config *GetDeviceConfig();
 
 protected:
