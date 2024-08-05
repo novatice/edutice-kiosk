@@ -60,51 +60,12 @@ int main(int argc, char *argv[]) {
       break;
     }
   }
-#ifdef __linux__
-  QFile configurationFile = QFile("/etc/edutice-kiosk/kiosk.json");
-  if (!configurationFile.exists()) {
-      logger.critical() << "Unable to find configuration file";
-      ::exit(1);
-  } else {
-      bool opened = configurationFile.open(QIODevice::ReadOnly);
-      if (opened) {
-          QString content = configurationFile.readAll();
-          QJsonObject configuration = QJsonDocument::fromJson(content.toUtf8()).object();
-
-          QJsonValue urlValue = configuration.value("url");
-          QJsonValue totemValue = configuration.value("totem");
-          bool automaticMode = configuration.value("automatic").toBool();
-
-          if (urlValue.isUndefined()) {
-              logger.critical() << "Unable to find \"url\" key in configuration";
-              ::exit(3);
-          }
-          bool totem;
-          if (totemValue.isUndefined()) {
-              totem = false;
-          } else {
-              totem = true;
-          }
-
-          QString url = normalizeUrl(urlValue.toString());
-      } else {
-          logger.critical() << "Unable to open configuration file";
-          ::exit(2);
-      }
-  }
-#elif _WIN32
-  QFile configurationFile = QFile("C:\\Program Files\\Novatice Technologies\\kiosk\\webportal.txt");
   Config* deviceConfig = Config::GetDeviceConfig();
   if (deviceConfig == nullptr) {
       ::exit(2);
   }
   deviceConfig->SetProxy();
-  //When config will be refactored for linux we will be able to just pass config for simplicity
-  QString url = deviceConfig->GetUrl();
-  bool automaticMode = deviceConfig->GetAutomaticMode();
   bool totem = deviceConfig->SetTotemMode();
-
-#endif
 
   QQmlApplicationEngine engine;
 
@@ -132,9 +93,10 @@ int main(int argc, char *argv[]) {
   Process *process = new Process(&engine);
   QObject::
       connect(QCoreApplication::instance(), SIGNAL(aboutToQuit()), process, SLOT(disconnect()));
-  engine.rootContext()->setContextProperty("urlToLoad", url);
+  //We could possibly change to only deviceConfig in the futur
+  engine.rootContext()->setContextProperty("urlToLoad", deviceConfig->GetUrl());
   engine.rootContext()->setContextProperty("totem", totem);
-  engine.rootContext()->setContextProperty("automatic", automaticMode);
+  engine.rootContext()->setContextProperty("automatic", deviceConfig->GetAutomaticMode());
   engine.rootContext()->setContextProperty("deviceConfig", deviceConfig);
 
   logger.debug() << "just before start";

@@ -1,4 +1,7 @@
 #include "config.h"
+#include <qdir.h>
+#include <qjsondocument.h>
+#include <qjsonobject.h>
 #include <stdexcept>
 #include <windows.h>
 
@@ -32,6 +35,7 @@ QString GetStringFromReg(HKEY hKey, std::wstring path, std::wstring value)
                            nullptr,
                            &data[0],
                            &dataSize);
+    //we need to do something to be able to log value
     if (retCode != ERROR_SUCCESS) {
         qWarning("Coulndn't get REG_SZ value %s from Registry :: error = %s",
                  value.c_str(),
@@ -56,6 +60,8 @@ DWORD GetDwordFromReg(HKEY hKey, std::wstring path, std::wstring value)
                                 nullptr,
                                 &data,
                                 &dataSize);
+
+    //we need to do something to be able to log value
     if (retCode != ERROR_SUCCESS) {
         qWarning("Coulndn't get DWORD value %s from Registry :: error = %s",
                  value.c_str(),
@@ -151,35 +157,91 @@ Config *Config::GetDeviceConfig()
 
         DWORD automatic = GetDwordFromReg(HKEY_LOCAL_MACHINE, g_kioskSubkey, L"Automatic");
 
-        if (url.isNull()) {
-            qCritical("Unable to find url configuration");
+        if (!url.isNull()) {
+            QString proxyHostname = GetStringFromReg(HKEY_LOCAL_MACHINE,
+                                                     g_kioskSubkey,
+                                                     L"ProxyHostname");
+
+            DWORD dwordPort = GetDwordFromReg(HKEY_LOCAL_MACHINE, g_kioskSubkey, L"ProxyPort");
+
+            QString serverAddress = GetStringFromReg(HKEY_LOCAL_MACHINE,
+                                                     g_kioskSubkey,
+                                                     L"ServerHostname");
+
+            QString deviceUuid = GetStringFromReg(HKEY_LOCAL_MACHINE, g_kioskSubkey, L"DeviceUUID");
+
+            qDebug(
+                "Device config found. url : %s ; automatic : %d ; serverAddress : %s ; " "deviceuui"
+                                                                                         "d : %s",
+                qUtf8Printable(url),
+                automatic,
+                qUtf8Printable(serverAddress),
+                qUtf8Printable(deviceUuid));
+            return g_config = new Config(url,
+                                         automatic,
+                                         serverAddress,
+                                         deviceUuid,
+                                         proxyHostname,
+                                         dwordPort);
+        }
+        //no registry we fallback on files
+        qCritical("Unable to find url registry");
+        QFile configurationFile = QFile(
+            "C:\\Program Files\\Novatice Technologies\\kiosk\\webportal.txt");
+        QFile proxyFile = QFile("C:\\Program Files\\Novatice Technologies\\kiosk\\proxyPortal.txt");
+
+#elif __linux__
+        QFile configurationFile = QFile("/etc/edutice-kiosk/kiosk.json");
+#endif
+        if (!configurationFile.exists()) {
+            qCritical() << "Unable to find configuration file";
             return nullptr;
         }
+        if (!configurationFile.open(QIODevice::ReadOnly)) {
+            qCritical() << "Unable to find \"url\" key in configuration";
+            return nullptr;
+        }
+        QString content = configurationFile.readAll();
+        QJsonObject configuration = QJsonDocument::fromJson(content.toUtf8()).object();
 
-        QString proxyHostname = GetStringFromReg(HKEY_LOCAL_MACHINE,
-                                                 g_kioskSubkey,
-                                                 L"ProxyHostname");
+        QJsonValue urlValue = configuration.value("url");
+        QJsonValue totemValue = configuration.value("totem");
+        bool automaticMode = configuration.value("automatic").toBool();
 
-        DWORD dwordPort = GetDwordFromReg(HKEY_LOCAL_MACHINE, g_kioskSubkey, L"ProxyPort");
-
-        QString serverAddress = GetStringFromReg(HKEY_LOCAL_MACHINE,
-                                                 g_kioskSubkey,
-                                                 L"ServerHostname");
-
-        QString deviceUuid = GetStringFromReg(HKEY_LOCAL_MACHINE, g_kioskSubkey, L"DeviceUUID");
-
-        qDebug(
-            "Device config found. url : %s ; automatic : %d ; serverAddress : %s ; deviceUuid : %s",
-            qUtf8Printable(url),
-            automatic,
-            qUtf8Printable(serverAddress),
-            qUtf8Printable(deviceUuid));
-        return g_config
-               = new Config(url, automatic, serverAddress, deviceUuid, proxyHostname, dwordPort);
-#elif __linux__
-        // not implemented
-        return NULL;
+        if (urlValue.isUndefined()) {
+            qCritical() << "Unable to find \"url\" key in configuration";
+            return nullptr;
+        }
+        bool totem;
+        if (totemValue.isUndefined()) {
+            totem = false;
+        } else {
+            totem = true;
+        }
+        QString proxyHost;
+        int proxyPort = NULL;
+#ifdef _WIN32
+        if (proxyFile.exists()) {
+            bool opened = proxyFile.open(QIODevice::ReadOnly);
+            if (opened) {
+                QString content = proxyFile.readAll();
+                if (!content.isEmpty()) {
+                    QStringList proxyStrings = content.split(":");
+                    if (proxyStrings.size() > 2) {
+                        qWarning("ProxyPortal doesn't contain a correct address. No Proxy set up.");
+                    } else {
+                        proxyHost = proxyStrings[0];
+                        proxyPort = proxyStrings[1].toInt();
+                    }
+                } else {
+                    qWarning() << proxyFile.fileName() << "is empty. No proxy set up.";
+                }
+            }
+        }
 #endif
+        g_config = new Config(urlValue.toString(), automaticMode, NULL, NULL, proxyHost, proxyPort);
+        g_config->_totem = totem;
+        return g_config;
     }
 }
 
@@ -199,6 +261,8 @@ bool Config::SetProxy()
 
 bool Config::SetTotemMode()
 {
-    _totem = GetDwordFromReg(HKEY_LOCAL_MACHINE, g_kioskSubkey, L"Totem");
+    if (!_totem) {
+        _totem = GetDwordFromReg(HKEY_LOCAL_MACHINE, g_kioskSubkey, L"Totem");
+    }
     return _totem;
 }
