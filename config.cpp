@@ -4,6 +4,8 @@
 
 Config *Config::g_config;
 
+const static std::wstring g_kioskSubkey{L"SOFTWARE\\Novatice\\Edutice\\Kiosk"};
+
 QString GetStringFromReg(HKEY hKey, std::wstring path, std::wstring value)
 {
     DWORD dataSize;
@@ -15,6 +17,9 @@ QString GetStringFromReg(HKEY hKey, std::wstring path, std::wstring value)
                                 nullptr,
                                 &dataSize);
     if (retCode != ERROR_SUCCESS) {
+        qWarning("Coulndn't get REG_SZ value %s from Registry :: error = %s",
+                 value.c_str(),
+                 qUtf8Printable(std::to_string(retCode).c_str()));
         return NULL;
     }
     std::wstring data;
@@ -28,6 +33,9 @@ QString GetStringFromReg(HKEY hKey, std::wstring path, std::wstring value)
                            &data[0],
                            &dataSize);
     if (retCode != ERROR_SUCCESS) {
+        qWarning("Coulndn't get REG_SZ value %s from Registry :: error = %s",
+                 value.c_str(),
+                 qUtf8Printable(std::to_string(retCode).c_str()));
         return NULL;
     }
 
@@ -37,11 +45,47 @@ QString GetStringFromReg(HKEY hKey, std::wstring path, std::wstring value)
     return QString::fromWCharArray(data.c_str());
 }
 
-Config::Config(const QString &serverAddress, const QString &deviceUuid)
+DWORD GetDwordFromReg(HKEY hKey, std::wstring path, std::wstring value)
+{
+    DWORD data{};
+    DWORD dataSize = sizeof(data);
+    LONG retCode = RegGetValueW(hKey,
+                                path.c_str(),
+                                value.c_str(),
+                                RRF_RT_REG_DWORD,
+                                nullptr,
+                                &data,
+                                &dataSize);
+    if (retCode != ERROR_SUCCESS) {
+        qWarning("Coulndn't get DWORD value %s from Registry :: error = %s",
+                 value.c_str(),
+                 qUtf8Printable(std::to_string(retCode).c_str()));
+        return NULL;
+    }
+    return data;
+}
+
+Config::Config(const QString &url,
+               const bool &automatic,
+               const QString &serverAddress,
+               const QString &deviceUuid,
+               const QString &proxyHostname,
+               const int &proxyPort)
     : _serverAddress(serverAddress)
     , _deviceUuid(deviceUuid)
+    , _url(url)
+    , _automatic(automatic)
+    , _proxyHostname(proxyHostname)
+    , _proxyPort(proxyPort)
 {
-    _arguments = "?kiosk=true&deviceUuid=" + _deviceUuid.toStdString();
+    if (!_serverAddress.isNull() && !_deviceUuid.isNull()) {
+        _arguments = "?kiosk=true&deviceUuid=" + _deviceUuid.toStdString();
+    }
+    if (!_url.isNull()) {
+        if (!_url.startsWith("http://") && !_url.startsWith("https://")) {
+            _url = "https://" + url;
+        }
+    }
 }
 
 const QString Config::addNeosUrlParameters(QString url)
@@ -51,6 +95,10 @@ const QString Config::addNeosUrlParameters(QString url)
         return NULL;
     }
     if (url.contains(_arguments.c_str())) {
+        return url;
+    }
+    if (_arguments.empty()) {
+        qWarning("Arguments are empty. Cannot add them to url");
         return url;
     }
     auto urlStr = url.toStdString();
@@ -99,24 +147,58 @@ Config *Config::GetDeviceConfig()
         return g_config;
     } else {
 #ifdef _WIN32
+        QString url = GetStringFromReg(HKEY_LOCAL_MACHINE, g_kioskSubkey, L"Url");
+
+        DWORD automatic = GetDwordFromReg(HKEY_LOCAL_MACHINE, g_kioskSubkey, L"Automatic");
+
+        if (url.isNull()) {
+            qCritical("Unable to find url configuration");
+            return nullptr;
+        }
+
+        QString proxyHostname = GetStringFromReg(HKEY_LOCAL_MACHINE,
+                                                 g_kioskSubkey,
+                                                 L"ProxyHostname");
+
+        DWORD dwordPort = GetDwordFromReg(HKEY_LOCAL_MACHINE, g_kioskSubkey, L"ProxyPort");
+
         QString serverAddress = GetStringFromReg(HKEY_LOCAL_MACHINE,
-                                                 L"SOFTWARE\\Novatice\\Edutice\\Service",
+                                                 g_kioskSubkey,
                                                  L"ServerHostname");
 
-        QString deviceUuid = GetStringFromReg(HKEY_LOCAL_MACHINE,
-                                              L"SOFTWARE\\Novatice\\Edutice\\Service",
-                                              L"DeviceUUID");
-        if (serverAddress.isNull() || deviceUuid.isNull()) {
-            qCritical("Couldn't get device config");
-            return NULL;
-        }
-        qDebug("Device config found. serverAddress : %s ; deviceUuid : %s",
-               qUtf8Printable(serverAddress),
-               qUtf8Printable(deviceUuid));
-        return g_config = new Config(serverAddress, deviceUuid);
+        QString deviceUuid = GetStringFromReg(HKEY_LOCAL_MACHINE, g_kioskSubkey, L"DeviceUUID");
+
+        qDebug(
+            "Device config found. url : %s ; automatic : %d ; serverAddress : %s ; deviceUuid : %s",
+            qUtf8Printable(url),
+            automatic,
+            qUtf8Printable(serverAddress),
+            qUtf8Printable(deviceUuid));
+        return g_config
+               = new Config(url, automatic, serverAddress, deviceUuid, proxyHostname, dwordPort);
 #elif __linux__
         // not implemented
         return NULL;
 #endif
     }
+}
+
+bool Config::SetProxy()
+{
+    if (_proxyHostname.isEmpty() || _proxyHostname.isNull() || _proxyPort == NULL) {
+        qInfo("No proxy configuration found.");
+        return false;
+    }
+    _proxy.setType(QNetworkProxy::HttpProxy);
+    _proxy.setHostName(_proxyHostname);
+    _proxy.setPort(_proxyPort);
+    QNetworkProxy::setApplicationProxy(_proxy);
+    qInfo("Proxy found %s on port : %d", qUtf8Printable(_proxy.hostName()), _proxy.port());
+    return true;
+}
+
+bool Config::SetTotemMode()
+{
+    _totem = GetDwordFromReg(HKEY_LOCAL_MACHINE, g_kioskSubkey, L"Totem");
+    return _totem;
 }

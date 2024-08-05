@@ -62,105 +62,89 @@ int main(int argc, char *argv[]) {
   }
 #ifdef __linux__
   QFile configurationFile = QFile("/etc/edutice-kiosk/kiosk.json");
-#elif _WIN32
-  QFile configurationFile =
-      QFile("C:\\Program Files\\Novatice Technologies\\kiosk\\webportal.txt");
-  //Parsing of proxy file and setup of proxy
-  QFile proxyFile = QFile("C:\\Program Files\\Novatice Technologies\\kiosk\\proxyPortal.txt");
-  if(proxyFile.exists()){
-      bool opened = proxyFile.open(QIODevice::ReadOnly);
-      if(opened){
-          QString content = proxyFile.readAll();
-          if(!content.isEmpty()){
-              QStringList proxyStrings = content.split(":");
-              if(proxyStrings.size()>2){
-                  logger.warning("ProxyPortal doesn't contain a correct address. No Proxy set up.");
-              }else{
-                  QNetworkProxy proxy;
-                  proxy.setType(QNetworkProxy::HttpProxy);
-                  proxy.setHostName(proxyStrings[0]);
-                  proxy.setPort(proxyStrings[1].toInt());
-                  QNetworkProxy::setApplicationProxy(proxy);
-                  logger.info()<< "Proxy found" <<proxy.hostName() <<"on port:" << proxy.port();
-              }
-          }else{
-              logger.warning() << proxyFile.fileName() <<"is empty. No proxy set up.";
+  if (!configurationFile.exists()) {
+      logger.critical() << "Unable to find configuration file";
+      ::exit(1);
+  } else {
+      bool opened = configurationFile.open(QIODevice::ReadOnly);
+      if (opened) {
+          QString content = configurationFile.readAll();
+          QJsonObject configuration = QJsonDocument::fromJson(content.toUtf8()).object();
+
+          QJsonValue urlValue = configuration.value("url");
+          QJsonValue totemValue = configuration.value("totem");
+          bool automaticMode = configuration.value("automatic").toBool();
+
+          if (urlValue.isUndefined()) {
+              logger.critical() << "Unable to find \"url\" key in configuration";
+              ::exit(3);
           }
+          bool totem;
+          if (totemValue.isUndefined()) {
+              totem = false;
+          } else {
+              totem = true;
+          }
+
+          QString url = normalizeUrl(urlValue.toString());
+      } else {
+          logger.critical() << "Unable to open configuration file";
+          ::exit(2);
       }
   }
+#elif _WIN32
+  QFile configurationFile = QFile("C:\\Program Files\\Novatice Technologies\\kiosk\\webportal.txt");
   Config* deviceConfig = Config::GetDeviceConfig();
-
+  if (deviceConfig == nullptr) {
+      ::exit(2);
+  }
+  deviceConfig->SetProxy();
+  //When config will be refactored for linux we will be able to just pass config for simplicity
+  QString url = deviceConfig->GetUrl();
+  bool automaticMode = deviceConfig->GetAutomaticMode();
+  bool totem = deviceConfig->SetTotemMode();
 
 #endif
-  if (!configurationFile.exists()) {
-    logger.critical() << "Unable to find configuration file";
-    ::exit(1);
-  } else {
-    bool opened = configurationFile.open(QIODevice::ReadOnly);
-    if (opened) {
-      QString content = configurationFile.readAll();
-      QJsonObject configuration =
-          QJsonDocument::fromJson(content.toUtf8()).object();
 
-      QJsonValue urlValue = configuration.value("url");
-      QJsonValue totemValue = configuration.value("totem");
-      bool automaticMode = configuration.value("automatic").toBool();
+  QQmlApplicationEngine engine;
 
-      if (urlValue.isUndefined()) {
-        logger.critical() << "Unable to find \"url\" key in configuration";
-        ::exit(3);
-      }
-      bool totem;
-      if (totemValue.isUndefined()) {
-        totem = false;
-      } else {
-        totem = true;
-      }
-
-      QString url = normalizeUrl(urlValue.toString());
-
-      QQmlApplicationEngine engine;
-
-      engine.addImportPath("qrc:/qml/"); /* Insert relative path to your
+  engine.addImportPath("qrc:/qml/"); /* Insert relative path to your
                                                 import directory here */
 
-      qmlRegisterSingletonType<Process>("Process", 1, 0, "Process",
-                                        get_process_singleton);
+  qmlRegisterSingletonType<Process>("Process", 1, 0, "Process", get_process_singleton);
 
-      qmlRegisterSingletonType<InactivityFilter>("InactivityWatcher", 1, 0,
-                                                 "InactivityWatcher",
-                                                 get_inactivity_filter);
+  qmlRegisterSingletonType<InactivityFilter>("InactivityWatcher",
+                                             1,
+                                             0,
+                                             "InactivityWatcher",
+                                             get_inactivity_filter);
 
-      const QUrl qmlUrl(QStringLiteral("qrc:/qml/main.qml"));
-      QObject::connect(
-          &engine, &QQmlApplicationEngine::objectCreated, &app,
-          [qmlUrl](QObject *obj, const QUrl &objUrl) {
-            if (!obj && qmlUrl == objUrl)
+  const QUrl qmlUrl(QStringLiteral("qrc:/qml/main.qml"));
+  QObject::connect(
+      &engine,
+      &QQmlApplicationEngine::objectCreated,
+      &app,
+      [qmlUrl](QObject *obj, const QUrl &objUrl) {
+          if (!obj && qmlUrl == objUrl)
               QCoreApplication::exit(-1);
-          },
-          Qt::QueuedConnection);
-      Process *process = new Process(&engine);
-      QObject::connect(QCoreApplication::instance(),SIGNAL(aboutToQuit()), process, SLOT(disconnect()));
-      engine.rootContext()->setContextProperty("urlToLoad", url);
-      engine.rootContext()->setContextProperty("totem", totem);
-      engine.rootContext()->setContextProperty("automatic", automaticMode);
-      engine.rootContext()->setContextProperty("deviceConfig",deviceConfig);
+      },
+      Qt::QueuedConnection);
+  Process *process = new Process(&engine);
+  QObject::
+      connect(QCoreApplication::instance(), SIGNAL(aboutToQuit()), process, SLOT(disconnect()));
+  engine.rootContext()->setContextProperty("urlToLoad", url);
+  engine.rootContext()->setContextProperty("totem", totem);
+  engine.rootContext()->setContextProperty("automatic", automaticMode);
+  engine.rootContext()->setContextProperty("deviceConfig", deviceConfig);
 
-      logger.debug() << "just before start";
+  logger.debug() << "just before start";
 
-      engine.load(qmlUrl);
+  engine.load(qmlUrl);
 
-      if (!totem) {
-        app.installEventFilter(keyEater);
-      }
-
-      return app.exec();
-
-    } else {
-      logger.critical() << "Unable to open configuration file";
-      ::exit(2);
-    }
+  if (!totem) {
+      app.installEventFilter(keyEater);
   }
-}
 
+  return app.exec();
+}
 
