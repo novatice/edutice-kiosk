@@ -249,6 +249,8 @@ bool Config::SetProxy()
 {
     if (_proxyHostname.isEmpty() || _proxyHostname.isNull() || _proxyPort == NULL) {
         qInfo("No proxy configuration found.");
+        _proxy.setType(QNetworkProxy::NoProxy);
+        QNetworkProxy::setApplicationProxy(_proxy);
         return false;
     }
     _proxy.setType(QNetworkProxy::HttpProxy);
