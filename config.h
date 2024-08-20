@@ -27,7 +27,7 @@ public:
     Q_INVOKABLE const QString addNeosUrlParameters(QString url);
 
     bool SetProxy();
-    bool SetTotemMode();
+    bool GetTotemMode();
 
     //Gets device's config from NEOS Registry keys
     static Config *GetDeviceConfig();
@@ -45,7 +45,7 @@ private:
     Q_PROPERTY(bool automatic READ GetAutomaticMode CONSTANT)
     bool _automatic;
 
-    bool _totem;
+    bool _totem = false;
 
     QString _proxyHostname;
     int _proxyPort;

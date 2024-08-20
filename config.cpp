@@ -261,10 +261,10 @@ bool Config::SetProxy()
     return true;
 }
 
-bool Config::SetTotemMode()
+bool Config::GetTotemMode()
 {
     if (!_totem) {
-        _totem = GetDwordFromReg(HKEY_LOCAL_MACHINE, g_kioskSubkey, L"Totem");
+        _totem = GetDwordFromReg(HKEY_LOCAL_MACHINE, g_kioskSubkey, L"Totem") == 1 ? true : false;
     }
     return _totem;
 }

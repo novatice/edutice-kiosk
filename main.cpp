@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
       ::exit(2);
   }
   deviceConfig->SetProxy();
-  bool totem = deviceConfig->SetTotemMode();
+  bool totem = deviceConfig->GetTotemMode();
 
   QQmlApplicationEngine engine;
 
