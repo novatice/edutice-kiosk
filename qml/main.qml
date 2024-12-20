@@ -131,7 +131,7 @@ Window {
                     KioskButton {
                         icon.source: "../icons/forward.png"
                         onClicked: webEngine.goForward()
-                        tooltip: "Précédent"
+                        tooltip: "Suivant"
                         disabled: !webEngine.canGoForward
                     }
 
