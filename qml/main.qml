@@ -522,7 +522,7 @@ Window {
                 }
 
                 onLoadingChanged: function (request) {
-                    if  if (request.status === WebEngineView.LoadFailedStatus &&
+                    if (request.status === WebEngineView.LoadFailedStatus &&
                             (request.errorCode <400 && request.errorCode>=500)) {
                         console.log("loading failed: ", request.errorCode, " ",
                                     request.errorString)
