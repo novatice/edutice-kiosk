@@ -6,7 +6,7 @@
 
 #ifdef _WIN32
 #include <windows.h>
-#endif _WIN32
+#endif
 
 Config *Config::g_config;
 
@@ -229,7 +229,7 @@ Config *Config::GetDeviceConfig()
             totem = true;
         }
         QString proxyHost;
-        int proxyPort = NULL;
+        int proxyPort = 0;
 
         g_config = new Config(urlValue.toString(), automaticMode, NULL, NULL, proxyHost, proxyPort);
         g_config->_totem = totem;
@@ -240,10 +240,12 @@ Config *Config::GetDeviceConfig()
 
 bool Config::SetProxy()
 {
-    if (_proxyHostname.isEmpty() || _proxyHostname.isNull() || _proxyPort == NULL) {
+    if (_proxyHostname.isEmpty() || _proxyHostname.isNull() || _proxyPort == 0) {
+#ifdef _WIN32
         qInfo("No proxy configuration found.");
         _proxy.setType(QNetworkProxy::NoProxy);
         QNetworkProxy::setApplicationProxy(_proxy);
+#endif
         return false;
     }
     _proxy.setType(QNetworkProxy::HttpProxy);
