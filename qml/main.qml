@@ -516,7 +516,8 @@ Window {
                     // ignore mailto and other
                     if (!(urlStr.startsWith("http://") || urlStr.startsWith(
                               "https://"))) {
-                        request.action = WebEngineNavigationRequest.reject()
+                        console.debug("reject");
+                        request.reject();
                     } else {
                         if (firstLoad) {
                             firstLoad = urlStr === urlToLoad
