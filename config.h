@@ -21,13 +21,14 @@ public:
     const QString &GetDeviceUuid() { return _deviceUuid; }
     const bool &GetAutomaticMode() { return _automatic; }
     const QString &GetUrl() { return _url; }
+    const bool &GetTotemMode(){return _totem;}
 
     //Adds the kiosk arguments to the url to be recognized as such
     //@param param1 url string to change
     Q_INVOKABLE const QString addNeosUrlParameters(QString url);
 
     bool SetProxy();
-    bool GetTotemMode();
+    //bool GetTotemMode();
 
     //Gets device's config from NEOS Registry keys
     static Config *GetDeviceConfig();

@@ -65,7 +65,6 @@ int main(int argc, char *argv[]) {
       ::exit(2);
   }
   deviceConfig->SetProxy();
-  bool totem = deviceConfig->GetTotemMode();
 
   QQmlApplicationEngine engine;
 
@@ -92,10 +91,10 @@ int main(int argc, char *argv[]) {
       Qt::QueuedConnection);
   Process *process = new Process(&engine);
   QObject::
-      connect(QCoreApplication::instance(), SIGNAL(aboutToQuit()), process, SLOT(disconnect()));
+      connect(QCoreApplication::instance(),&QCoreApplication::aboutToQuit,process,&Process::disconnect);
   //We could possibly change to only deviceConfig in the futur
   engine.rootContext()->setContextProperty("urlToLoad", deviceConfig->GetUrl());
-  engine.rootContext()->setContextProperty("totem", totem);
+  engine.rootContext()->setContextProperty("totem", deviceConfig->GetTotemMode());
   engine.rootContext()->setContextProperty("automatic", deviceConfig->GetAutomaticMode());
   engine.rootContext()->setContextProperty("deviceConfig", deviceConfig);
 
@@ -103,7 +102,7 @@ int main(int argc, char *argv[]) {
 
   engine.load(qmlUrl);
 
-  if (!totem) {
+  if (!deviceConfig->GetTotemMode()) {
       app.installEventFilter(keyEater);
   }
 

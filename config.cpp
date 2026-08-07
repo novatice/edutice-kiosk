@@ -3,10 +3,14 @@
 #include <qjsondocument.h>
 #include <qjsonobject.h>
 #include <stdexcept>
+
+#ifdef _WIN32
 #include <windows.h>
+#endif
 
 Config *Config::g_config;
 
+#ifdef _WIN32
 const static std::wstring g_kioskSubkey{L"SOFTWARE\\Novatice\\Edutice\\Kiosk"};
 
 QString GetStringFromReg(HKEY hKey, std::wstring path, std::wstring value)
@@ -49,6 +53,7 @@ QString GetStringFromReg(HKEY hKey, std::wstring path, std::wstring value)
     return QString::fromWCharArray(data.c_str());
 }
 
+
 DWORD GetDwordFromReg(HKEY hKey, std::wstring path, std::wstring value)
 {
     DWORD data{};
@@ -70,6 +75,7 @@ DWORD GetDwordFromReg(HKEY hKey, std::wstring path, std::wstring value)
     }
     return data;
 }
+#endif
 
 Config::Config(const QString &url,
                const bool &automatic,
@@ -99,6 +105,10 @@ const QString Config::addNeosUrlParameters(QString url)
     if (url.isNull() || url.isEmpty()) {
         qCritical("Cannot add NEOS parameters url is null or empty");
         return NULL;
+    }
+    if (_serverAddress.isNull()|| _serverAddress.isEmpty()){
+        qCritical("Cannot add NEOS parameters server address is null");
+        return url;
     }
     if (url.contains(_arguments.c_str())) {
         return url;
@@ -177,22 +187,22 @@ Config *Config::GetDeviceConfig()
                 automatic,
                 qUtf8Printable(serverAddress),
                 qUtf8Printable(deviceUuid));
-            return g_config = new Config(url,
+
+            bool totem = GetDwordFromReg(HKEY_LOCAL_MACHINE, g_kioskSubkey, L"Totem") == 1 ? true : false;
+            g_config = new Config(url,
                                          automatic,
                                          serverAddress,
                                          deviceUuid,
                                          proxyHostname,
                                          dwordPort);
+            g_config->_totem = totem;
+            return g_config;
+        } else {
+            return nullptr;
         }
-        //no registry we fallback on files
-        qCritical("Unable to find url registry");
-        QFile configurationFile = QFile(
-            "C:\\Program Files\\Novatice Technologies\\kiosk\\webportal.txt");
-        QFile proxyFile = QFile("C:\\Program Files\\Novatice Technologies\\kiosk\\proxyPortal.txt");
-
 #elif __linux__
         QFile configurationFile = QFile("/etc/edutice-kiosk/kiosk.json");
-#endif
+
         if (!configurationFile.exists()) {
             qCritical() << "Unable to find configuration file";
             return nullptr;
@@ -219,38 +229,23 @@ Config *Config::GetDeviceConfig()
             totem = true;
         }
         QString proxyHost;
-        int proxyPort = NULL;
-#ifdef _WIN32
-        if (proxyFile.exists()) {
-            bool opened = proxyFile.open(QIODevice::ReadOnly);
-            if (opened) {
-                QString content = proxyFile.readAll();
-                if (!content.isEmpty()) {
-                    QStringList proxyStrings = content.split(":");
-                    if (proxyStrings.size() > 2) {
-                        qWarning("ProxyPortal doesn't contain a correct address. No Proxy set up.");
-                    } else {
-                        proxyHost = proxyStrings[0];
-                        proxyPort = proxyStrings[1].toInt();
-                    }
-                } else {
-                    qWarning() << proxyFile.fileName() << "is empty. No proxy set up.";
-                }
-            }
-        }
-#endif
+        int proxyPort = 0;
+
         g_config = new Config(urlValue.toString(), automaticMode, NULL, NULL, proxyHost, proxyPort);
         g_config->_totem = totem;
         return g_config;
+#endif
     }
 }
 
 bool Config::SetProxy()
 {
-    if (_proxyHostname.isEmpty() || _proxyHostname.isNull() || _proxyPort == NULL) {
+    if (_proxyHostname.isEmpty() || _proxyHostname.isNull() || _proxyPort == 0) {
+#ifdef _WIN32
         qInfo("No proxy configuration found.");
         _proxy.setType(QNetworkProxy::NoProxy);
         QNetworkProxy::setApplicationProxy(_proxy);
+#endif
         return false;
     }
     _proxy.setType(QNetworkProxy::HttpProxy);
@@ -261,10 +256,3 @@ bool Config::SetProxy()
     return true;
 }
 
-bool Config::GetTotemMode()
-{
-    if (!_totem) {
-        _totem = GetDwordFromReg(HKEY_LOCAL_MACHINE, g_kioskSubkey, L"Totem") == 1 ? true : false;
-    }
-    return _totem;
-}
