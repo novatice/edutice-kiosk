@@ -17,8 +17,12 @@ Window {
     flags: Qt.FramelessWindowHint | Qt.Window
     visibility: Qt.WindowFullScreen
     Component.onCompleted: {
+        var webview = createNewTab(urlToLoad);
+        webview.homeWebview = true;
+        console.debug("totem", deviceConfig.totem);
+        console.debug("tabmode", deviceConfig.tabMode);
         if (!automatic) {
-            dataDialog.open()
+            dataDialog.open();
         }
     }
 
@@ -27,8 +31,8 @@ Window {
         sequences: ["Alt+Shift+Q"]
 
         onActivated: {
-            console.log("JS: Shortcut activated.")
-            Process.openTerminal()
+            console.log("JS: Shortcut activated.");
+            Process.openTerminal();
         }
     }
 
@@ -41,27 +45,26 @@ Window {
 
     function getCloseText() {
         if (automatic) {
-            return "Vos données de navigation seront supprimées.\n\n Confirmez-vous cette opération ?"
+            return "Vos données de navigation seront supprimées.\n\n Confirmez-vous cette opération ?";
         } else {
-            return "Voulez-vous quitter la borne de consultation ?"
+            return "Voulez-vous quitter la borne de consultation ?";
         }
     }
 
     KioskDialog {
+        id: dataDialog
         Timer {
             id: dataTimer
             interval: 10000
             onTriggered: {
-                bubbleAnimationDisappear.start()
+                bubbleAnimationDisappear.start();
             }
         }
-
-        id: dataDialog
         title: "Données de navigation"
         acceptText: "Ok"
         text: "Pensez à fermer votre session afin de procéder au nettoyage de vos données de navigation !"
         onAccepted: {
-            bubbleAnimationAppear.start()
+            bubbleAnimationAppear.start();
         }
     }
 
@@ -72,13 +75,13 @@ Window {
         acceptText: "Confirmer"
         text: getCloseText()
         onAccepted: {
-            Process.disconnect()
-            Qt.quit()
+            Process.disconnect();
+            Qt.quit();
         }
 
         onCanceled: {
             if (!totem) {
-                inactivityTimer.start()
+                inactivityTimer.start();
             }
         }
     }
@@ -119,45 +122,47 @@ Window {
 
                 RowLayout {
 
-                    Layout.alignment: Qt.AlignVCenter
+                    Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
 
                     KioskButton {
                         icon.source: "../icons/back.png"
                         onClicked: webEngine.goBack()
                         tooltip: "Précédent"
-                        disabled: !webEngine.canGoBack
+                        disabled: !getCurrentWebview().canGoBack
                     }
 
                     KioskButton {
                         icon.source: "../icons/forward.png"
-                        onClicked: webEngine.goForward()
+                        onClicked: getCurrentWebview().goForward()
                         tooltip: "Suivant"
-                        disabled: !webEngine.canGoForward
+                        disabled: !getCurrentWebview().canGoForward
                     }
 
                     KioskButton {
                         icon.source: "../icons/refresh.svg"
-                        onClicked: webEngine.reloadAndBypassCache()
+                        onClicked: getCurrentWebview().reloadAndBypassCache()
                         tooltip: "Recharger la page"
-                        disabled: webEngine.loading
+                        disabled: getCurrentWebview().loading
                     }
 
                     KioskButton {
                         icon.source: "../icons/home.svg"
-                        onClicked: webEngine.goHome()
+                        onClicked: {
+                            tabBar.setCurrentIndex(0);
+                            getCurrentWebview().goHome();
+                        }
                         tooltip: "Retourner à la page d'accueil"
                         disabled: false
                     }
                 }
 
                 KioskButton {
+                    id: cleanBtn
                     readonly property int maxIconSize: 48
                     readonly property int minIconSize: 32
                     property int iconSize: maxIconSize
-                    property bool disabled: webEngine.firstLoad
+                    property bool disabled: getCurrentWebview().firstLoad
                     visible: automatic
-
-                    id: cleanBtn
                     //visible: !webEngine.firstLoad
                     text: "Nettoyer mes données !"
 
@@ -170,7 +175,6 @@ Window {
                     palette.buttonText: "white"
 
                     contentItem: RowLayout {
-
                         id: contentItem
 
                         SequentialAnimation {
@@ -261,30 +265,53 @@ Window {
                     verticalPadding: 0
 
                     onClicked: {
-                        Process.disconnect()
-                        Qt.quit()
+                        Process.disconnect();
+                        Qt.quit();
+                    }
+                }
+
+                ScrollView {
+                    id: tabBarScrollView
+                    Layout.fillWidth: true
+
+                    ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+                    ScrollBar.horizontal.policy: ScrollBar.AsNeeded
+
+                    clip: true
+
+                    TabBar {
+                        id: tabBar
+                        visible: deviceConfig.tabMode
+                        Layout.alignment: Qt.AlignLeft
+                        background: Rectangle {
+                            color: "transparent"
+                        }
+                        onCurrentIndexChanged: {
+                            console.debug("currentIndex : ", tabBar.currentIndex);
+                        }
                     }
                 }
 
                 Spacer {}
 
                 RowLayout {
-                    Layout.alignment: Qt.AlignVCenter
+                    Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
 
                     KioskButton {
                         icon.source: "../icons/zoom-out.svg"
                         tooltip: "Zoom arrière"
 
                         onClicked: {
-                            let newZoomFactor = webEngine.zoomFactor - 0.1
-                            webEngine.zoomFactor = newZoomFactor
-                            webEngine.zoomFactor = newZoomFactor
+                            var currentWebview = getCurrentWebview();
+                            let newZoomFactor = currentWebview.zoomFactor - 0.1;
+                            currentWebview.zoomFactor = newZoomFactor;
+                            currentWebview.zoomFactor = newZoomFactor;
                         }
                     }
 
                     KioskButton {
                         id: zoom
-                        text: (webEngine.zoomFactor * 100).toFixed(0) + "%"
+                        text: (getCurrentWebview().zoomFactor * 100).toFixed(0) + "%"
                         tooltip: "Réinitialiser le zoom"
                         contentItem: Item {
                             implicitHeight: text.height + 10
@@ -305,15 +332,15 @@ Window {
                                 text: zoom.text
                                 horizontalAlignment: Text.AlignHCenter
                                 font.family: AvenirFonts.regular.name
-                                width: AvenirFonts.regular.metrics.boundingRect(
-                                           "100%").width
+                                width: AvenirFonts.regular.metrics.boundingRect("100%").width
                                 color: "white"
                             }
                         }
 
                         onClicked: {
-                            webEngine.zoomFactor = 1
-                            webEngine.zoomFactor = 1
+                            var currentWebview = getCurrentWebview();
+                            currentWebview.zoomFactor = 1;
+                            currentWebview.zoomFactor = 1;
                         }
                     }
 
@@ -321,9 +348,10 @@ Window {
                         icon.source: "../icons/zoom-in.svg"
                         tooltip: "Zoom avant"
                         onClicked: {
-                            let newZoomFactor = webEngine.zoomFactor + 0.1
-                            webEngine.zoomFactor = newZoomFactor
-                            webEngine.zoomFactor = newZoomFactor
+                            var currentWebview = getCurrentWebview();
+                            let newZoomFactor = currentWebview.zoomFactor + 0.1;
+                            currentWebview.zoomFactor = newZoomFactor;
+                            currentWebview.zoomFactor = newZoomFactor;
                         }
                     }
 
@@ -338,8 +366,8 @@ Window {
                             tooltip: "Quitter"
 
                             onClicked: {
-                                inactivityTimer.stop()
-                                closeDialog.open()
+                                inactivityTimer.stop();
+                                closeDialog.open();
                             }
                         }
 
@@ -384,7 +412,7 @@ Window {
                             }
 
                             onFinished: function () {
-                                dataTimer.start()
+                                dataTimer.start();
                             }
 
                             //running: true
@@ -422,22 +450,20 @@ Window {
                                 anchors.bottom: parent.top
                                 anchors.right: parent.right
 
-                                anchors.rightMargin: closeButton.width / 2 - bubbleCanvas.width / 2
-                                                     - parent.anchors.rightMargin
+                                anchors.rightMargin: closeButton.width / 2 - bubbleCanvas.width / 2 - parent.anchors.rightMargin
                                 onPaint: {
-                                    var ctx = getContext("2d")
+                                    var ctx = getContext("2d");
 
                                     // the equliteral triangle
-                                    ctx.beginPath()
-                                    ctx.moveTo(0, bubbleCanvas.height)
-                                    ctx.lineTo(bubbleCanvas.width / 2, 0)
-                                    ctx.lineTo(bubbleCanvas.width,
-                                               bubbleCanvas.height)
-                                    ctx.closePath()
+                                    ctx.beginPath();
+                                    ctx.moveTo(0, bubbleCanvas.height);
+                                    ctx.lineTo(bubbleCanvas.width / 2, 0);
+                                    ctx.lineTo(bubbleCanvas.width, bubbleCanvas.height);
+                                    ctx.closePath();
 
                                     // fill color
-                                    ctx.fillStyle = "#41B146"
-                                    ctx.fill()
+                                    ctx.fillStyle = "#41B146";
+                                    ctx.fill();
                                 }
                             }
                         }
@@ -454,117 +480,79 @@ Window {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            KioskProgressBar {
-                width: parent.width
-                height: 5
-                z: 1
-                value: webEngine.loadProgress
-                visible: webEngine.loading
-                anchors.top: parent.top
+            StackLayout {
+                id: tabStack
+                anchors.fill: parent
+                currentIndex: tabBar.currentIndex
+                onCurrentIndexChanged: {
+                    console.debug("tabStack index : ", tabStack.currentIndex);
+                }
             }
 
-            WebEngineView {
-                property string homeUrl: urlToLoad
-                property bool firstLoad: true
+            Component {
+                id: tabButtonComponent
+                TabButton {
+                    id: tabBtn
 
+                    property WebEngineView associatedWebview: null
+                    text: associatedWebview != null ? associatedWebview.title : "Loading ... "
+                    property url tabIconUrl: ""
 
-                width: parent.width
-                height: parent.height
+                    contentItem: RowLayout {
 
-                profile.httpCacheType: WebEngineProfile.NoCache
-                profile.persistentCookiesPolicy: WebEngineProfile.NoPersistentCookies
-                profile.httpAcceptLanguage: getLocaleAsAcceptLanguage()
-                id: webEngine
+                        Image {
+                            Layout.preferredWidth: 16
+                            Layout.preferredHeight: 16
+                            Layout.alignment: Qt.AlignVCenter
+                            source: associatedWebview.icon
 
-                function goHome() {
-                    url = homeUrl
-                }
-
-                function getLocaleAsAcceptLanguage() {
-                    const locale = Qt.locale()
-                    return locale.name.replace("_", "-")
-                }
-
-                onContextMenuRequested: function (request) {
-                    request.accepted = true
-                }
-
-                onFullScreenRequested: function (request) {
-                    request.accept()
-                }
-
-                onPrintRequested: function () {
-                    showMessage("L'impression n'est pas autorisée")
-                }
-
-                onFileDialogRequested: function (request) {
-                    showMessage("Le téléversement de fichiers n'est pas autorisé")
-                    request.accepted = true
-                    request.dialogReject()
-                }
-
-                onNewWindowRequested: function (request) {
-                    if (request.userInitiated) {
-                        webEngine.url = request.requestedUrl
-                    }
-                }
-
-                onNavigationRequested: function (request) {
-
-                    var urlStr = request.url.toString()
-                    console.log("trying to navigate to: ", urlStr)
-                    // ignore mailto and other
-                    if (!(urlStr.startsWith("http://") || urlStr.startsWith(
-                              "https://"))) {
-                        console.debug("reject");
-                        request.reject();
-                    } else {
-                        if (firstLoad) {
-                            firstLoad = urlStr === urlToLoad
+                            // Show default icon or hide if no favicon exists yet
+                            visible: associatedWebview.icon
+                            fillMode: Image.PreserveAspectFit
                         }
-                        if(deviceConfig !== undefined){
-                            const urlAfterParameters = deviceConfig.addNeosUrlParameters(urlStr)
-                            if(urlAfterParameters !== urlStr){
-                                webEngine.url = urlAfterParameters
-                                request.reject()
-                            }else{
-                                request.accept()
-                            }
+                        Label {
+                            text: tabBtn.text
+                            Layout.fillWidth: true
+                            verticalAlignment: Text.AlignVCenter
+                            elide: "ElideRight"
                         }
+                    }
 
+                    opacity: 1
+                    background: Rectangle {
+                        color: "white"
+                        opacity: tabBtn.checked ? 0.3 : (tabBtn.hovered ? 0.1 : 0)
+                        radius: 10
                     }
                 }
+            }
 
+            Component {
+                id: newTabWebviewComponent
 
-                onLoadingChanged: function (request) {
-                    if (request.status === WebEngineView.LoadFailedStatus &&
-                            (request.errorCode <400 && request.errorCode>=500)) {
-                        console.log("loading failed: ", request.errorCode, " ",
-                            request.errorString)
-                        reloadingTimer.start()
-                    }
+                NeosWebview {
+                    id: webview
+                    property TabButton tabButton: null
                 }
-
-                function showMessage(text) {
-                    messageDialog.text = text
-                    messageDialog.open()
-                }
-
-                KioskDialog {
-                    id: messageDialog
-                    title: "Avertissement"
-                }
-
-                Timer {
-                    id: reloadingTimer
-                    interval: 5000
-                    onTriggered: function () {
-                        webEngine.reloadAndBypassCache()
-                    }
-                }
-
-                url: urlToLoad
             }
         }
+    }
+
+    function createNewTab(url) {
+        var newWebview = newTabWebviewComponent.createObject(tabStack);
+        var newTabButton = tabButtonComponent.createObject(tabBar);
+        newWebview.tabButton = newTabButton;
+        newTabButton.associatedWebview = newWebview;
+        newWebview.homeUrl = url;
+        tabBar.addItem(newTabButton);
+        tabBar.setCurrentIndex(tabBar.count - 1);
+        return newWebview;
+    }
+
+    function getCurrentWebview() {
+        if (tabBar.currentIndex >= 0 && tabBar.currentIndex < tabStack.count) {
+            return tabStack.children[tabBar.currentIndex];
+        }
+        return null;
     }
 }

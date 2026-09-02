@@ -189,6 +189,7 @@ Config *Config::GetDeviceConfig()
                 qUtf8Printable(deviceUuid));
 
             bool totem = GetDwordFromReg(HKEY_LOCAL_MACHINE, g_kioskSubkey, L"Totem") == 1 ? true : false;
+            bool tabMode = GetDwordFromReg(HKEY_LOCAL_MACHINE, g_kioskSubkey, L"TabMode") == 1 ? true : false;
             g_config = new Config(url,
                                          automatic,
                                          serverAddress,
@@ -196,12 +197,14 @@ Config *Config::GetDeviceConfig()
                                          proxyHostname,
                                          dwordPort);
             g_config->_totem = totem;
+            g_config->_tabMode = tabMode;
             return g_config;
         } else {
             return nullptr;
         }
 #elif __linux__
         QFile configurationFile = QFile("/etc/edutice-kiosk/kiosk.json");
+        QFile tabModeFile = QFile("/etc/edutice-kiosk/tabMode");
 
         if (!configurationFile.exists()) {
             qCritical() << "Unable to find configuration file";
@@ -232,6 +235,9 @@ Config *Config::GetDeviceConfig()
         int proxyPort = 0;
 
         g_config = new Config(urlValue.toString(), automaticMode, NULL, NULL, proxyHost, proxyPort);
+        if (tabModeFile.exists()) {
+            g_config->_tabMode = true;
+        }
         g_config->_totem = totem;
         return g_config;
 #endif

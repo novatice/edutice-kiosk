@@ -22,6 +22,7 @@ public:
     const bool &GetAutomaticMode() { return _automatic; }
     const QString &GetUrl() { return _url; }
     const bool &GetTotemMode(){return _totem;}
+    const bool &GetTabMode(){return _tabMode;}
 
     //Adds the kiosk arguments to the url to be recognized as such
     //@param param1 url string to change
@@ -45,7 +46,9 @@ private:
     QString _url;
     Q_PROPERTY(bool automatic READ GetAutomaticMode CONSTANT)
     bool _automatic;
-
+    Q_PROPERTY(bool tabMode READ GetTabMode CONSTANT)
+    bool _tabMode = false;
+    Q_PROPERTY(bool totem READ GetTotemMode CONSTANT)
     bool _totem = false;
 
     QString _proxyHostname;
