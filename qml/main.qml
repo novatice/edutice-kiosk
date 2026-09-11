@@ -126,7 +126,7 @@ Window {
 
                     KioskButton {
                         icon.source: "../icons/back.png"
-                        onClicked: webEngine.goBack()
+                        onClicked: getCurrentWebview().goBack()
                         tooltip: "Précédent"
                         disabled: !getCurrentWebview().canGoBack
                     }

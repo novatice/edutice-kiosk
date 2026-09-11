@@ -23,6 +23,7 @@ public:
     const QString &GetUrl() { return _url; }
     const bool &GetTotemMode(){return _totem;}
     const bool &GetTabMode(){return _tabMode;}
+    const bool &GetPrintAllowed(){return _printAllowed;}
 
     //Adds the kiosk arguments to the url to be recognized as such
     //@param param1 url string to change
@@ -50,6 +51,8 @@ private:
     bool _tabMode = false;
     Q_PROPERTY(bool totem READ GetTotemMode CONSTANT)
     bool _totem = false;
+    Q_PROPERTY(bool printAllowed READ GetPrintAllowed CONSTANT)
+    bool _printAllowed = false;
 
     QString _proxyHostname;
     int _proxyPort;

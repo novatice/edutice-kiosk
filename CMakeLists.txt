@@ -29,8 +29,8 @@ set (
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 REQUIRED COMPONENTS Core Quick WebEngineQuick QuickControls2 Network)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick WebEngineQuick QuickControls2 Network)
+find_package(QT NAMES Qt6 REQUIRED COMPONENTS Core Quick WebEngineQuick QuickControls2 Network PrintSupport Pdf)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick WebEngineQuick QuickControls2 Network PrintSupport Pdf)
 
 set(TS_FILES edutice-kiosk_fr_FR.ts)
 
@@ -39,8 +39,10 @@ set(PROJECT_SOURCES
         config.cpp
         main.cpp
         process.cpp
+        print-helper.cpp
         inactivity-filter.cpp
         process.h
+        print-helper.h
         inactivity-filter.h
         qml.qrc
         ${TS_FILES}
@@ -56,6 +58,6 @@ target_compile_definitions(edutice-kiosk
 
 
 target_link_libraries(edutice-kiosk
-  PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick Qt${QT_VERSION_MAJOR}::WebEngineQuick Qt6::QuickControls2 Qt${QT_VERSION_MAJOR}::Network)
+  PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick Qt${QT_VERSION_MAJOR}::WebEngineQuick Qt6::QuickControls2 Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::PrintSupport Qt${QT_VERSION_MAJOR}::Pdf)
 
 set_target_properties(edutice-kiosk PROPERTIES WIN32_EXECUTABLE TRUE)

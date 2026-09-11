@@ -1,5 +1,6 @@
 import QtQuick 2.12
 import QtWebEngine
+import PrintHelper 1.0
 
 WebEngineView {
     id: webView
@@ -15,6 +16,7 @@ WebEngineView {
     property string homeUrl: ""
     property bool firstLoad: true
     property bool homeWebview: false
+    property bool isPrinting: false
 
     profile.httpCacheType: WebEngineProfile.NoCache
     profile.persistentCookiesPolicy: WebEngineProfile.NoPersistentCookies
@@ -40,8 +42,63 @@ WebEngineView {
         request.accept();
     }
 
+    function isPrintAllowed() {
+        return deviceConfig !== undefined && deviceConfig.printAllowed;
+    }
+
+    function requestPrint(printFn) {
+        if (!isPrintAllowed()) {
+            showMessage("L'impression n'est pas autorisée");
+            return;
+        }
+        if (isPrinting) {
+            console.log("print already in progress, ignoring request");
+            return;
+        }
+        var path = PrintHelper.tempPdfPath();
+        if (!path) {
+            showMessage("L'impression n'est pas autorisée");
+            return;
+        }
+        isPrinting = true;
+        printFn(path);
+    }
+
     onPrintRequested: function () {
-        showMessage("L'impression n'est pas autorisée");
+        requestPrint(function (path) {
+            webView.printToPdf(path);
+        });
+    }
+
+    // Qt >= 6.8 emits printRequestedByFrame for subframes instead of
+    // printRequested. Connections with ignoreUnknownSignals keeps this
+    // working on Qt 6.7 and earlier where the signal does not exist.
+    Connections {
+        target: webView
+        ignoreUnknownSignals: true
+        function onPrintRequestedByFrame(frame) {
+            requestPrint(function (path) {
+                frame.printToPdf(path);
+            });
+        }
+    }
+
+    onPdfPrintingFinished: function (filePath, success) {
+        if (!isPrinting) {
+            return;
+        }
+        isPrinting = false;
+        if (!success) {
+            console.log("PDF generation failed for printing: ", filePath);
+            showMessage("Échec de l'impression");
+            return;
+        }
+        var result = PrintHelper.printPdf(filePath);
+        if (result === PrintHelper.NoPrinter) {
+            showMessage("Aucune imprimante disponible");
+        } else if (result !== PrintHelper.Ok) {
+            showMessage("Échec de l'impression");
+        }
     }
 
     onFileDialogRequested: function (request) {

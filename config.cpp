@@ -190,6 +190,7 @@ Config *Config::GetDeviceConfig()
 
             bool totem = GetDwordFromReg(HKEY_LOCAL_MACHINE, g_kioskSubkey, L"Totem") == 1 ? true : false;
             bool tabMode = GetDwordFromReg(HKEY_LOCAL_MACHINE, g_kioskSubkey, L"TabMode") == 1 ? true : false;
+            bool allowPrint = GetDwordFromReg(HKEY_LOCAL_MACHINE, g_kioskSubkey, L"AllowPrint") == 1 ? true : false;
             g_config = new Config(url,
                                          automatic,
                                          serverAddress,
@@ -198,6 +199,7 @@ Config *Config::GetDeviceConfig()
                                          dwordPort);
             g_config->_totem = totem;
             g_config->_tabMode = tabMode;
+            g_config->_printAllowed = allowPrint;
             return g_config;
         } else {
             return nullptr;
@@ -205,6 +207,7 @@ Config *Config::GetDeviceConfig()
 #elif __linux__
         QFile configurationFile = QFile("/etc/edutice-kiosk/kiosk.json");
         QFile tabModeFile = QFile("/etc/edutice-kiosk/tabMode");
+        QFile printerAllowedFile = QFile("/etc/edutice-kiosk/printerAllowed");
 
         if (!configurationFile.exists()) {
             qCritical() << "Unable to find configuration file";
@@ -237,6 +240,9 @@ Config *Config::GetDeviceConfig()
         g_config = new Config(urlValue.toString(), automaticMode, NULL, NULL, proxyHost, proxyPort);
         if (tabModeFile.exists()) {
             g_config->_tabMode = true;
+        }
+        if (printerAllowedFile.exists()) {
+            g_config->_printAllowed = true;
         }
         g_config->_totem = totem;
         return g_config;
