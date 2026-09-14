@@ -38,8 +38,8 @@ Window {
 
     InactivityTimer {
         id: inactivityTimer
-        inactivyDelay: 300
-        lastSeconds: 20
+        inactivyDelay: deviceConfig.inactivityDelay
+        lastSeconds: deviceConfig.warningDuration
         enabled: !totem
     }
 

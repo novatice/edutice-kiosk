@@ -42,7 +42,7 @@ Item {
 
     Timer {
         id: inactivityTimer
-        interval: (inactivyDelay - lastSeconds) * 1000
+        interval: Math.max(1000, (inactivyDelay - lastSeconds) * 1000)
 
         onTriggered: function () {
             console.log("inactivity")

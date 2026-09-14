@@ -24,6 +24,8 @@ public:
     const bool &GetTotemMode(){return _totem;}
     const bool &GetTabMode(){return _tabMode;}
     const bool &GetPrintAllowed(){return _printAllowed;}
+    const int &GetInactivityDelay(){return _inactivityDelay;}
+    const int &GetWarningDuration(){return _warningDuration;}
 
     //Adds the kiosk arguments to the url to be recognized as such
     //@param param1 url string to change
@@ -53,11 +55,24 @@ private:
     bool _totem = false;
     Q_PROPERTY(bool printAllowed READ GetPrintAllowed CONSTANT)
     bool _printAllowed = false;
+    Q_PROPERTY(int inactivityDelay READ GetInactivityDelay CONSTANT)
+    int _inactivityDelay = 300;
+    Q_PROPERTY(int warningDuration READ GetWarningDuration CONSTANT)
+    int _warningDuration = 20;
 
     QString _proxyHostname;
     int _proxyPort;
     QNetworkProxy _proxy;
 
     std::string _arguments;
+
+    static void ApplyInactivityTimings(Config *config,
+                                       int inactivityDelay,
+                                       int warningDuration,
+                                       bool hasInactivityDelay,
+                                       bool hasWarningDuration);
+#ifdef __linux__
+    static void LoadLinuxInactivityConfig(Config *config);
+#endif
 };
 #endif // CONFIG_H

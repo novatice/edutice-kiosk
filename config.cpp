@@ -10,6 +10,84 @@
 
 Config *Config::g_config;
 
+static const int g_defaultInactivityDelay = 300;
+static const int g_defaultWarningDuration = 20;
+
+void Config::ApplyInactivityTimings(Config *config, int inactivityDelay, int warningDuration, bool hasInactivityDelay, bool hasWarningDuration)
+{
+    if (!hasInactivityDelay || inactivityDelay <= 0) {
+        if (hasInactivityDelay) {
+            qWarning("Invalid \"inactivityDelay\" value %d. Using default %d seconds.",
+                     inactivityDelay,
+                     g_defaultInactivityDelay);
+        }
+        inactivityDelay = g_defaultInactivityDelay;
+    }
+    if (!hasWarningDuration || warningDuration <= 0) {
+        if (hasWarningDuration) {
+            qWarning("Invalid \"warningDuration\" value %d. Using default %d seconds.",
+                     warningDuration,
+                     g_defaultWarningDuration);
+        }
+        warningDuration = g_defaultWarningDuration;
+    }
+    if (warningDuration >= inactivityDelay) {
+        qWarning("Invalid inactivity configuration: warningDuration (%d) must be smaller than "
+                 "inactivityDelay (%d). Using defaults %d/%d seconds.",
+                 warningDuration,
+                 inactivityDelay,
+                 g_defaultInactivityDelay,
+                 g_defaultWarningDuration);
+        inactivityDelay = g_defaultInactivityDelay;
+        warningDuration = g_defaultWarningDuration;
+    }
+    config->_inactivityDelay = inactivityDelay;
+    config->_warningDuration = warningDuration;
+    qInfo("Inactivity config: inactivityDelay=%d seconds, warningDuration=%d seconds.",
+          config->_inactivityDelay,
+          config->_warningDuration);
+}
+
+#ifdef __linux__
+void Config::LoadLinuxInactivityConfig(Config *config)
+{
+    QFile inactivityFile("/etc/edutice-kiosk/inactivity.json");
+    int inactivityDelay = g_defaultInactivityDelay;
+    int warningDuration = g_defaultWarningDuration;
+    bool hasInactivityDelay = false;
+    bool hasWarningDuration = false;
+    if (inactivityFile.exists()) {
+        if (!inactivityFile.open(QIODevice::ReadOnly)) {
+            qWarning() << "Unable to open inactivity configuration file, using defaults";
+        } else {
+            QJsonParseError parseError;
+            QJsonDocument doc = QJsonDocument::fromJson(inactivityFile.readAll(), &parseError);
+            if (parseError.error != QJsonParseError::NoError || !doc.isObject()) {
+                qWarning() << "Invalid inactivity configuration file, using defaults:"
+                           << parseError.errorString();
+            } else {
+                QJsonObject inactivityConfig = doc.object();
+                QJsonValue delayValue = inactivityConfig.value("inactivityDelay");
+                QJsonValue warningValue = inactivityConfig.value("warningDuration");
+                if (!delayValue.isUndefined()) {
+                    hasInactivityDelay = true;
+                    inactivityDelay = delayValue.toInt(g_defaultInactivityDelay);
+                }
+                if (!warningValue.isUndefined()) {
+                    hasWarningDuration = true;
+                    warningDuration = warningValue.toInt(g_defaultWarningDuration);
+                }
+            }
+        }
+    }
+    ApplyInactivityTimings(config,
+                           inactivityDelay,
+                           warningDuration,
+                           hasInactivityDelay,
+                           hasWarningDuration);
+}
+#endif
+
 #ifdef _WIN32
 const static std::wstring g_kioskSubkey{L"SOFTWARE\\Novatice\\Edutice\\Kiosk"};
 
@@ -200,6 +278,17 @@ Config *Config::GetDeviceConfig()
             g_config->_totem = totem;
             g_config->_tabMode = tabMode;
             g_config->_printAllowed = allowPrint;
+            DWORD inactivityDelayReg = GetDwordFromReg(HKEY_LOCAL_MACHINE,
+                                                        g_kioskSubkey,
+                                                        L"InactivityDelay");
+            DWORD warningDurationReg = GetDwordFromReg(HKEY_LOCAL_MACHINE,
+                                                       g_kioskSubkey,
+                                                       L"WarningDuration");
+            ApplyInactivityTimings(g_config,
+                                   static_cast<int>(inactivityDelayReg),
+                                   static_cast<int>(warningDurationReg),
+                                   inactivityDelayReg != 0,
+                                   warningDurationReg != 0);
             return g_config;
         } else {
             return nullptr;
@@ -245,6 +334,7 @@ Config *Config::GetDeviceConfig()
             g_config->_printAllowed = true;
         }
         g_config->_totem = totem;
+        LoadLinuxInactivityConfig(g_config);
         return g_config;
 #endif
     }
