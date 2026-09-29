@@ -26,7 +26,6 @@ WebEngineView {
         if (homeUrl !== url) {
             url = homeUrl;
         }
-        tabStack.currentIndex = 0;
     }
 
     function getLocaleAsAcceptLanguage() {
