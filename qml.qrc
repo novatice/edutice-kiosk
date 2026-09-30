@@ -21,5 +21,6 @@
         <file>qml/KioskProgressBar.qml</file>
         <file>qml/AvenirFonts/AvenirFont.qml</file>
         <file>icons/brush.svg</file>
+        <file>qml/NeosWebview.qml</file>
     </qresource>
 </RCC>

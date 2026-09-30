@@ -8,6 +8,7 @@
 #include <QtWebEngineQuick/QtWebEngineQuick>
 
 #include "inactivity-filter.h"
+#include "print-helper.h"
 #include "process.h"
 #include "config.h"
 
@@ -18,6 +19,14 @@ static QObject *get_process_singleton(QQmlEngine *engine,
 
   Process *process = new Process(engine);
   return process;
+}
+
+static QObject *get_print_helper_singleton(QQmlEngine *engine,
+                                           QJSEngine *scriptEngine) {
+  Q_UNUSED(scriptEngine)
+
+  PrintHelper *helper = new PrintHelper(engine);
+  return helper;
 }
 
 QString normalizeUrl(QString url) {
@@ -72,6 +81,9 @@ int main(int argc, char *argv[]) {
                                                 import directory here */
 
   qmlRegisterSingletonType<Process>("Process", 1, 0, "Process", get_process_singleton);
+
+  qmlRegisterSingletonType<PrintHelper>("PrintHelper", 1, 0, "PrintHelper",
+                                        get_print_helper_singleton);
 
   qmlRegisterSingletonType<InactivityFilter>("InactivityWatcher",
                                              1,

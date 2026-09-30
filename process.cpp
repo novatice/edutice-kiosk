@@ -24,11 +24,13 @@ void Process::start(const QString &program) {
 }
 
 void Process::disconnect() {
-#ifdef __linux__
-    qDebug()<< "TEST DISCONNECT";
+#ifdef QT_DEBUG
+    qDebug()<<"DEBUG";
 #elif _WIN32
-  m_process->startDetached("shutdown", {"-L"});
-  m_process->waitForFinished(-1);
+    m_process->startDetached("shutdown", {"-L"});
+    m_process->waitForFinished(-1);
+#elif __linux__
+    qDebug()<< "TEST DISCONNECT";
 #endif
 }
 
