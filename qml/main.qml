@@ -45,7 +45,7 @@ Window {
 
     function getCloseText() {
         if (automatic) {
-            return "Vos données de navigation seront supprimées.\n\n Confirmez-vous cette opération ?";
+            return "Vos données de navigation seront supprimées.\n\nConfirmez-vous cette opération ?";
         } else {
             return "Voulez-vous quitter la borne de consultation ?";
         }
