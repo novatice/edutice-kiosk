@@ -17,9 +17,9 @@ Item {
 
     function getInactivityText() {
         if (automatic) {
-            return `Sans action de votre part vos données de navigation seront suprimées dans ${lastSecondsTimer.seconds} seconde(s).`
+            return `Sans action de votre part, vos données de navigation seront supprimées dans ${lastSecondsTimer.seconds} seconde(s).`
         } else {
-            return `Sans action de votre part la borne de consultation se fermera dans ${lastSecondsTimer.seconds} seconde(s).`
+            return `Sans action de votre part, la borne de consultation se fermera dans ${lastSecondsTimer.seconds} seconde(s).`
         }
     }
 
